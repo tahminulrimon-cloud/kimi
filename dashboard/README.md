@@ -76,11 +76,21 @@ a repo) so everyone sees the update.
 No backend, database, or paid hosting is required. Any of the following
 work well:
 
-- **GitHub Pages** (recommended if already using GitHub/git):
-  1. Push this `dashboard/` folder to a GitHub repository.
-  2. In the repo, go to **Settings → Pages**, set the source to the
-     branch/folder containing `index.html`.
-  3. GitHub gives you a free `https://<user>.github.io/<repo>/` URL.
+- **GitHub Pages** (already set up for this repo): a workflow at
+  `.github/workflows/pages.yml` automatically deploys the `dashboard/`
+  folder to GitHub Pages on every push to the default branch that
+  touches `dashboard/`. Live site:
+  **https://tahminulrimon-cloud.github.io/kimi/**
+  - The first deploy needs GitHub Pages turned on once: **Settings →
+    Pages → Build and deployment → Source: GitHub Actions** (the
+    workflow will do this automatically on its first successful run on
+    most accounts; if the Pages tab still shows "not enabled" after the
+    workflow run, flip that dropdown manually — one-time only).
+  - To deploy manually/immediately: **Actions → Deploy dashboard to
+    GitHub Pages → Run workflow**.
+  - For a different repo/host: push the `dashboard/` folder anywhere,
+    go to **Settings → Pages**, and set the source to the branch/folder
+    containing `index.html`.
 - **Netlify / Vercel (free tier)**: drag-and-drop the `dashboard/` folder
   onto their web dashboard, or connect the git repo — both offer instant
   free static hosting with a shareable URL.
