@@ -9,7 +9,8 @@
     { id: "training", label: "Training & Development", icon: "&#127891;" },
     { id: "admin", label: "Unit Administration", icon: "&#128203;" },
     { id: "maintenance", label: "Maintenance & Resources", icon: "&#128295;" },
-    { id: "welfare", label: "Welfare & Living Standard", icon: "&#9974;" }
+    { id: "welfare", label: "Welfare & Living Standard", icon: "&#9974;" },
+    { id: "actions", label: "Commander's Actions", icon: "&#9873;" }
   ];
 
   // Blank template used when the admin adds a new row to a list. The key is
@@ -33,7 +34,8 @@
     "maintenance.fleetHealth": { name: "New sub-unit", rating: "green" },
     "welfare.accommodation": { item: "New facility", note: "", status: "green" },
     "welfare.medical": { item: "New indicator", note: "", status: "green" },
-    "welfare.recreation": { item: "New facility / activity", note: "", status: "green" }
+    "welfare.recreation": { item: "New facility / activity", note: "", status: "green" },
+    "actions.items": { item: "New action", owner: "", due: "", status: "amber", note: "" }
   };
 
   var CFG = window.DASHBOARD_CONFIG || { REQUIRE_LOGIN: false };
@@ -48,11 +50,23 @@
 
   // ---------------- storage ----------------
   function loadData() {
+    var fresh = JSON.parse(JSON.stringify(window.DEFAULT_DATA));
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) return withDefaults(JSON.parse(raw), fresh);
     } catch (e) { /* ignore corrupt storage */ }
-    return JSON.parse(JSON.stringify(window.DEFAULT_DATA));
+    return fresh;
+  }
+
+  // Data saved before a new section existed would otherwise be missing it and
+  // break rendering. Fill any absent top-level section from the defaults,
+  // keeping everything the user has already entered.
+  function withDefaults(saved, fresh) {
+    if (!saved || typeof saved !== "object") return fresh;
+    Object.keys(fresh).forEach(function (key) {
+      if (saved[key] == null) saved[key] = fresh[key];
+    });
+    return saved;
   }
 
   function saveData() {
@@ -187,6 +201,49 @@
     );
   }
 
+  // ---------------- due dates ----------------
+  // Whole days from today until `dateStr` (YYYY-MM-DD). Negative = overdue.
+  // Returns null if the date is missing or unreadable, so a blank due date
+  // is simply "not tracked" rather than silently counting as overdue.
+  function daysUntil(dateStr) {
+    if (!dateStr) return null;
+    var parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateStr).trim());
+    if (!parts) return null;
+    var due = new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
+    if (isNaN(due.getTime())) return null;
+    var today = new Date();
+    today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    return Math.round((due - today) / 86400000);
+  }
+
+  function dueChip(dateStr) {
+    var d = daysUntil(dateStr);
+    if (d === null) {
+      return '<span class="due-chip none">No due date</span>';
+    }
+    if (d < 0) {
+      return '<span class="due-chip overdue">Overdue by ' + Math.abs(d) + (Math.abs(d) === 1 ? " day" : " days") + '</span>';
+    }
+    if (d === 0) return '<span class="due-chip soon">Due today</span>';
+    if (d <= 7) return '<span class="due-chip soon">Due in ' + d + (d === 1 ? " day" : " days") + '</span>';
+    return '<span class="due-chip">' + escapeHtml(dateStr) + '</span>';
+  }
+
+  // Open actions split by urgency. Used by both the Overview panel and the
+  // Commander's Actions tab so the two can never disagree.
+  function actionStats() {
+    var items = (state.data.actions && state.data.actions.items) || [];
+    var overdue = [];
+    var soon = [];
+    items.forEach(function (it, i) {
+      var d = daysUntil(it.due);
+      if (d === null) return;
+      if (d < 0) overdue.push({ item: it, index: i, days: d });
+      else if (d <= 7) soon.push({ item: it, index: i, days: d });
+    });
+    return { total: items.length, overdue: overdue, soon: soon };
+  }
+
   function card(inner, extraClass) {
     return '<div class="card' + (extraClass ? " " + extraClass : "") + '">' + inner + '</div>';
   }
@@ -238,8 +295,37 @@
       );
     }).join("");
 
+    // Actions needing attention are pulled to the top of the Overview so an
+    // overdue item can't sit unnoticed inside its own tab.
+    var stats = actionStats();
+    var urgent = stats.overdue.concat(stats.soon);
+    var alertCard = "";
+    if (urgent.length) {
+      var list = urgent.slice(0, 5).map(function (e) {
+        return (
+          '<div class="item-row">' +
+            '<div><div class="name">' + escapeHtml(e.item.item) + '</div>' +
+            '<div class="note">' + escapeHtml(e.item.owner || "Unassigned") + '</div></div>' +
+            dueChip(e.item.due) +
+          '</div>'
+        );
+      }).join("");
+      var more = urgent.length > 5
+        ? '<div class="note" style="margin-top:8px;">and ' + (urgent.length - 5) + ' more…</div>'
+        : "";
+      alertCard =
+        '<div class="card action-alert" data-goto="actions">' +
+          '<div class="card-header"><h3>&#9873; Needs command attention</h3>' +
+            '<span class="badge ' + (stats.overdue.length ? "red" : "amber") + '"><span class="dot"></span>' +
+            (stats.overdue.length ? stats.overdue.length + " overdue" : urgent.length + " due soon") +
+            '</span>' +
+          '</div>' + list + more +
+        '</div>';
+    }
+
     return (
       '<p class="section-summary">At-a-glance status across all five tracking categories. Click any card for details.</p>' +
+      (alertCard ? '<div class="grid" style="margin-bottom:16px;">' + alertCard + '</div>' : "") +
       '<div class="grid">' + cards + '</div>' +
       '<h2 style="margin-top:28px;">Unit Information</h2>' +
       '<div class="grid">' + metaCard + '</div>'
@@ -524,13 +610,89 @@
     );
   }
 
+  function renderActions() {
+    var a = state.data.actions;
+    var stats = actionStats();
+
+    var overall = card(
+      '<div class="card-header"><h2>Commander\'s Action Tracker</h2>' + statusField("actions.overall", a.overall) + '</div>' +
+      '<p class="note">' + textField("actions.summary", a.summary) + '</p>'
+    );
+
+    var counts = card(
+      '<h3>At a glance</h3>' +
+      '<div class="count-row">' +
+        '<div class="count-box' + (stats.overdue.length ? " bad" : "") + '">' +
+          '<div class="count-n">' + stats.overdue.length + '</div><div class="count-l">Overdue</div>' +
+        '</div>' +
+        '<div class="count-box' + (stats.soon.length ? " warn" : "") + '">' +
+          '<div class="count-n">' + stats.soon.length + '</div><div class="count-l">Due within 7 days</div>' +
+        '</div>' +
+        '<div class="count-box">' +
+          '<div class="count-n">' + stats.total + '</div><div class="count-l">Open actions</div>' +
+        '</div>' +
+      '</div>'
+    );
+
+    // Keep stored order while editing so rows don't jump under the cursor;
+    // sort most-urgent-first for reading.
+    var ordered = a.items.map(function (it, i) { return { item: it, index: i }; });
+    if (!state.editMode) {
+      ordered.sort(function (x, y) {
+        var dx = daysUntil(x.item.due);
+        var dy = daysUntil(y.item.due);
+        if (dx === null && dy === null) return 0;
+        if (dx === null) return 1;   // undated items sink to the bottom
+        if (dy === null) return -1;
+        return dx - dy;
+      });
+    }
+
+    var rows = ordered.map(function (entry) {
+      var it = entry.item;
+      var pfx = "actions.items." + entry.index;
+      var overdue = (daysUntil(it.due) || 0) < 0 && daysUntil(it.due) !== null;
+      var note = (it.note || state.editMode)
+        ? '<div class="note">' + textField(pfx + ".note", it.note) + '</div>'
+        : "";
+      return (
+        '<tr' + (overdue && !state.editMode ? ' class="row-overdue"' : "") + '>' +
+          '<td><div class="name">' + textField(pfx + ".item", it.item) + '</div>' + note + '</td>' +
+          '<td>' + textField(pfx + ".owner", it.owner) + '</td>' +
+          '<td>' + (state.editMode ? textField(pfx + ".due", it.due, "date") : dueChip(it.due)) + '</td>' +
+          '<td>' + statusField(pfx + ".status", it.status) + '</td>' +
+          delTd("actions.items", entry.index) +
+        '</tr>'
+      );
+    }).join("");
+
+    var empty = '<tr><td colspan="4" class="note" style="padding:16px 8px;">No open actions.</td></tr>';
+
+    var table = card(
+      '<h3>Open Actions</h3>' +
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>' +
+        '<th>Action</th><th>Owner</th><th>Due</th><th>Status</th>' + delTh() +
+      '</tr></thead><tbody>' + (rows || empty) + '</tbody></table></div>' +
+      addBtn("actions.items", "action"),
+      "card-wide"
+    );
+
+    return (
+      '<p class="section-summary">Items needing command attention that cut across the five tracking categories. ' +
+      '&ldquo;Overdue&rdquo; is worked out from the due date automatically. Remove an action once it is closed.</p>' +
+      '<div class="grid">' + overall + counts + '</div>' +
+      '<div class="grid" style="margin-top:16px;">' + table + '</div>'
+    );
+  }
+
   var RENDERERS = {
     overview: renderOverview,
     readiness: renderReadiness,
     training: renderTraining,
     admin: renderAdmin,
     maintenance: renderMaintenance,
-    welfare: renderWelfare
+    welfare: renderWelfare,
+    actions: renderActions
   };
 
   // ---------------- shell ----------------

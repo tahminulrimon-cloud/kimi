@@ -3,8 +3,35 @@
 A lightweight, single-page dashboard for tracking unit status across five
 categories: Operational Readiness, Training & Professional Development,
 Unit Administration, Maintenance & Resource Optimisation, and Soldiers'
-Welfare. Pure static HTML/CSS/JS — no server, database, or paid backend
-required. Works on low-end devices and slow connections.
+Welfare — plus a **Commander's Action Tracker** that cuts across all five.
+Pure static HTML/CSS/JS — no server, database, or paid backend required.
+Works on low-end devices and slow connections.
+
+## Commander's Action Tracker
+
+The sixth tab holds items needing command attention that don't sit neatly
+inside one category — the things that otherwise fall between them.
+
+Each action has an **owner** and a **due date**. Overdue is worked out from
+the date automatically, so there is nothing extra to maintain:
+
+| Shown | Meaning |
+| ----- | ------- |
+| `Overdue by N days` (red) | Due date has passed |
+| `Due in N days` / `Due today` (amber) | Due within the next 7 days |
+| the plain date | Further out |
+| `No due date` | Date left blank — not tracked for urgency |
+
+- Actions are listed **most urgent first**; undated ones sink to the bottom.
+  (While in Edit Mode the stored order is kept instead, so rows don't jump
+  around under the cursor as you type.)
+- Anything overdue or due within 7 days is also pulled onto the **Overview**
+  page under "Needs command attention", so it cannot sit unnoticed in its
+  own tab. Click that panel to jump to the tracker.
+- Dates must be written as `YYYY-MM-DD` (the Edit Mode field gives you a
+  date picker, so normally you don't type it by hand).
+- **Close an action by removing it** (Edit Mode → ✕). The tracker is a list
+  of open items, not a history.
 
 All data shipped in this folder is **sample/dummy data** clearly labeled
 as such. Replace values with real data before operational use, following
@@ -192,6 +219,10 @@ useful for paper briefs and files where a screen isn't available.
 - The Overview page's five summary cards automatically reflect whatever
   `overall` status is set in each category in `data.js` (or via Edit
   Mode) — you do not need to separately update the Overview.
+- The "Needs command attention" panel on the Overview is likewise derived
+  from the action due dates — there is no separate list to keep in step.
+- Data saved before a new tab existed still loads: any missing section is
+  filled in from `js/data.js` and your existing entries are kept.
 - No personal, sensitive, or real operational data should be entered
   into a copy of this dashboard hosted anywhere that isn't properly
   access-controlled for internal unit use. The admin login is a deterrent,
