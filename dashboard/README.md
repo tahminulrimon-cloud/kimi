@@ -14,12 +14,55 @@ the notes below.
 
 ```
 dashboard/
-├── index.html      # page shell — do not need to edit this
-├── css/style.css    # styling — do not need to edit this
-├── js/app.js         # rendering/logic — do not need to edit this
-├── js/data.js         # ← THE DATA FILE — edit this (or use Edit Mode in-app)
+├── index.html           # page shell — no need to edit this
+├── set-password.html    # ← tool for changing the admin password
+├── css/style.css        # styling — no need to edit this
+├── js/app.js            # rendering/logic — no need to edit this
+├── js/config.js         # ← ADMIN LOGIN SETTINGS — username & password
+├── js/data.js           # ← THE DATA FILE — edit this (or use Edit Mode in-app)
 └── README.md
 ```
+
+## Admin login
+
+Viewing the dashboard needs no sign-in. **Editing** does.
+
+Default credentials — **change these before real use**:
+
+| Username | Password |
+| -------- | -------- |
+| `admin`  | `mortar47` |
+
+### Changing the password
+
+1. Open **`set-password.html`** (in this folder) in any browser.
+2. Type the username and password you want, then click **Generate**.
+3. Copy the two lines it produces into `js/config.js`, replacing the
+   existing `ADMIN_USER` and `ADMIN_HASH` lines.
+4. Save and re-upload / `git push`.
+
+The password itself is never stored in the files — only a one-way SHA-256
+hash of it.
+
+To remove the login entirely and let anyone with the link edit, set
+`REQUIRE_LOGIN: false` in `js/config.js`.
+
+> ### ⚠️ How much protection is this really?
+>
+> This dashboard is a set of plain files with no server behind it. That
+> means the password check necessarily happens **inside the viewer's own
+> browser**, and someone who knows how to open the page source can bypass
+> the prompt and edit anyway.
+>
+> Treat it as a **lock that keeps honest people out** — like a sign on a
+> door — not as real security. Do not put genuinely sensitive or classified
+> information on a page that untrusted people can open. The real control is
+> **who can reach the URL**: keep it on an access-controlled intranet, a
+> private host, or a restricted share.
+>
+> If you later need proper accounts and enforced permissions, that requires
+> a backend service (Supabase and Firebase both have free tiers) — ask and
+> it can be added.
 
 ## Updating the data
 
@@ -30,8 +73,9 @@ person responsible for keeping it current.
 
 1. Open the dashboard in a browser and navigate to the category you want
    to update.
-2. Click **Edit Mode** (top right). Fields turn into text boxes and
-   status dropdowns (Green / Amber / Red).
+2. Click **Sign in to edit** (top right) and enter the admin username and
+   password. Once signed in the button becomes **Edit Mode** — click it.
+   Fields turn into text boxes and status dropdowns (Green / Amber / Red).
 3. Make your changes:
    - **Edit** — type over any value, or pick a new status from the dropdown.
    - **Insert** — click the dashed **+ Add …** button at the bottom of any
@@ -44,26 +88,43 @@ person responsible for keeping it current.
 5. Your edits are saved in the browser's local storage on that device
    and will still be there next time you open the page on the *same*
    browser/device.
-
-> **Note on access.** This is a static site with no server, so "admin" here
-> means whoever is using the browser — Edit Mode is not password-protected
-> and cannot be, without a backend. Control who can change the figures by
-> controlling who can reach the page (internal share, private host, or an
-> access-controlled intranet).
-
-Because Edit Mode saves to the browser only, it does **not** automatically
-sync to other people's phones/computers. To share updates:
-
-- Click **Export JSON** to download the current data as a file.
-- Send that file to whoever hosts/maintains the site, and have them
-  either:
-  - use **Import JSON** on the live site once (loads it into that
-    browser), or
-  - paste its contents into `js/data.js` and redeploy (this updates the
-    data for *everyone*, permanently — see Option B).
+6. Click **Sign out** when you are finished. (Signing in only lasts for
+   that browser tab's session anyway — closing the browser signs you out.)
 
 Click **Reset Sample Data** at any time to discard local edits and
-return to the sample data shipped in `js/data.js`.
+return to the sample data shipped in `js/data.js`. Import and Reset are
+available to signed-in admins only; Export and Print are open to everyone.
+
+## Who sees a correction, and when
+
+This matters — please read it before relying on the dashboard.
+
+**Automatic (no reload needed):** if the same person has the dashboard open
+in **several tabs or windows on the same device**, saving in one updates all
+the others instantly. A small "Dashboard updated" note confirms it. If you
+happen to be mid-edit in another tab, your typing is not overwritten — you
+are told a change arrived so you can save or cancel first.
+
+**NOT automatic:** a correction made on the Adjutant's laptop does **not**
+appear on someone else's phone. There is no server holding a shared copy —
+each device keeps its own. This is the direct trade-off of running with no
+backend and no hosting cost.
+
+### Pushing a correction out to everyone
+
+1. On the device with the correct figures, click **Export JSON**.
+2. Send that file to whoever maintains the site.
+3. They paste its contents into `js/data.js` and redeploy (see Option B).
+   Everyone now sees the corrected figures the next time they load the page.
+
+For day-to-day use the practical pattern is: **one nominated person keeps
+the master copy** (usually the Adjutant), makes corrections there, and
+publishes via step 3. Others view, print, and report changes to them.
+
+> If you want a correction on any device to appear on every device
+> automatically, that needs a shared database and a login server. Both
+> Supabase and Firebase do this on a free tier — it is a change of
+> architecture, not a tweak, so ask if you want it.
 
 ### Option B — Edit `js/data.js` directly (updates the data for everyone)
 
@@ -133,4 +194,11 @@ useful for paper briefs and files where a screen isn't available.
   Mode) — you do not need to separately update the Overview.
 - No personal, sensitive, or real operational data should be entered
   into a copy of this dashboard hosted anywhere that isn't properly
-  access-controlled for internal unit use.
+  access-controlled for internal unit use. The admin login is a deterrent,
+  not a safeguard — see the warning under **Admin login**.
+- The sign-in lasts for the browser session only. Closing the browser
+  signs the admin out; there is no "stay signed in".
+- The password check needs a modern browser. It works when the page is
+  opened over `https://` (e.g. GitHub Pages) and when opened directly from
+  a local file. A page served over plain `http://` from a remote server may
+  block it — use `https://` for anything hosted.
