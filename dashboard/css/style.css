@@ -416,6 +416,92 @@ select.editable-input { cursor: pointer; }
   text-align: center;
 }
 
+/* ---------- Admin sign-in ---------- */
+.login-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 100;
+  padding: 16px;
+  overflow-y: auto;
+}
+.login-backdrop.open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.login-box h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.login-sub { color: var(--muted); font-size: 0.86rem; margin: 0 0 16px; }
+
+.login-field { margin-bottom: 12px; }
+.login-field label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+/* 16px avoids iOS Safari zooming the page in on focus */
+.login-field .editable-input {
+  font-size: 16px;
+  padding: 10px;
+}
+
+.login-error {
+  display: none;
+  color: var(--red);
+  background: var(--red-bg);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+.login-error.show { display: block; }
+
+.login-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+.login-actions .btn { padding: 10px 16px; }
+
+.login-note {
+  color: var(--muted);
+  font-size: 0.76rem;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* Banner shown when another tab saved a change */
+.sync-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  z-index: 90;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 860px) {
   .sidebar {
@@ -441,7 +527,7 @@ select.editable-input { cursor: pointer; }
 /* ---------- Print ---------- */
 @media print {
   .sidebar, .topbar .actions, .hamburger, .edit-only-controls,
-  .btn-add, .btn-del { display: none !important; }
+  .btn-add, .btn-del, .login-backdrop, .sync-toast { display: none !important; }
   body, .app { background: #fff; color: #000; }
   .main { padding: 0; }
   .card { border: 1px solid #999; background: #fff; break-inside: avoid; }

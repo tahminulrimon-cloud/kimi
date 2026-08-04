@@ -36,10 +36,14 @@
     "welfare.recreation": { item: "New facility / activity", note: "", status: "green" }
   };
 
+  var CFG = window.DASHBOARD_CONFIG || { REQUIRE_LOGIN: false };
+  var AUTH_KEY = "regimentDashboardAuth_v1";
+
   var state = {
     data: loadData(),
     editMode: false,
-    route: currentRoute()
+    route: currentRoute(),
+    signedIn: !CFG.REQUIRE_LOGIN || sessionStorage.getItem(AUTH_KEY) === "1"
   };
 
   // ---------------- storage ----------------
@@ -53,6 +57,66 @@
 
   function saveData() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+  }
+
+  // ---------------- admin sign-in ----------------
+  // NOTE: with no server to ask, this check necessarily runs in the viewer's
+  // own browser. It keeps casual users out of Edit Mode; it is not a security
+  // boundary. See the warning in js/config.js.
+  function sha256Hex(text) {
+    if (!window.crypto || !window.crypto.subtle) return Promise.reject(new Error("no-crypto"));
+    return window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+        return b.toString(16).padStart(2, "0");
+      }).join("");
+    });
+  }
+
+  function openLogin() {
+    document.getElementById("loginError").className = "login-error";
+    document.getElementById("loginPass").value = "";
+    document.getElementById("loginBackdrop").classList.add("open");
+    document.getElementById("loginUser").focus();
+  }
+
+  function closeLogin() {
+    document.getElementById("loginBackdrop").classList.remove("open");
+  }
+
+  function loginFailed(message) {
+    var el = document.getElementById("loginError");
+    el.textContent = message;
+    el.className = "login-error show";
+  }
+
+  function attemptLogin(user, pass) {
+    if (user.trim().toLowerCase() !== String(CFG.ADMIN_USER).toLowerCase()) {
+      loginFailed("Incorrect username or password.");
+      return;
+    }
+    sha256Hex(user.trim().toLowerCase() + ":" + pass).then(function (hex) {
+      if (hex !== CFG.ADMIN_HASH) {
+        loginFailed("Incorrect username or password.");
+        return;
+      }
+      state.signedIn = true;
+      sessionStorage.setItem(AUTH_KEY, "1");
+      closeLogin();
+      state.editMode = true;
+      render();
+    })["catch"](function () {
+      loginFailed("This browser cannot check the password here. Open the dashboard over https:// and try again.");
+    });
+  }
+
+  function signOut() {
+    sessionStorage.removeItem(AUTH_KEY);
+    state.signedIn = false;
+    if (state.editMode) {
+      state.data = loadData();
+      state.editMode = false;
+    }
+    render();
   }
 
   function resetData() {
@@ -496,9 +560,26 @@
       "Last updated " + state.data.meta.lastUpdated + " by " + state.data.meta.updatedBy;
 
     var editBtn = document.getElementById("editToggleBtn");
-    editBtn.textContent = state.editMode ? "Save Changes" : "Edit Mode";
+    if (state.editMode) {
+      editBtn.textContent = "Save Changes";
+    } else if (state.signedIn) {
+      editBtn.textContent = "Edit Mode";
+    } else {
+      editBtn.textContent = "Sign in to edit";
+    }
     editBtn.className = "btn " + (state.editMode ? "btn-primary" : "");
     document.getElementById("cancelEditBtn").style.display = state.editMode ? "inline-flex" : "none";
+    document.getElementById("logoutBtn").style.display =
+      (CFG.REQUIRE_LOGIN && state.signedIn && !state.editMode) ? "inline-flex" : "none";
+
+    // Destructive/data-replacing actions belong to the admin too.
+    ["resetBtn", "importInput"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.disabled = !state.signedIn;
+    });
+    var importLabel = document.querySelector('label[for="importInput"]');
+    if (importLabel) importLabel.style.opacity = state.signedIn ? "" : "0.45";
+    document.getElementById("resetBtn").style.opacity = state.signedIn ? "" : "0.45";
 
     document.getElementById("content").innerHTML = RENDERERS[state.route]();
     closeSidebar();
@@ -625,10 +706,30 @@
       collectEdits();
       saveData();
       state.editMode = false;
+    } else if (!state.signedIn) {
+      openLogin();
+      return;
     } else {
       state.editMode = true;
     }
     render();
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", signOut);
+
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    attemptLogin(document.getElementById("loginUser").value, document.getElementById("loginPass").value);
+  });
+
+  document.getElementById("loginCancel").addEventListener("click", closeLogin);
+
+  document.getElementById("loginBackdrop").addEventListener("click", function (e) {
+    if (e.target === this) closeLogin();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeLogin();
   });
 
   document.getElementById("cancelEditBtn").addEventListener("click", function () {
@@ -654,6 +755,36 @@
 
   document.getElementById("hamburgerBtn").addEventListener("click", openSidebar);
   document.getElementById("overlay").addEventListener("click", closeSidebar);
+
+  // ---------------- live refresh across tabs/windows ----------------
+  // The browser fires "storage" in every OTHER tab on the same device when
+  // this key changes, so a save in one tab refreshes the rest with no reload.
+  // (Different devices cannot see each other without a server — use
+  // Export/Import JSON to move data between a phone and a computer.)
+  var toastTimer = null;
+  function showSyncToast(message) {
+    var existing = document.querySelector(".sync-toast");
+    if (existing) existing.remove();
+    var el = document.createElement("div");
+    el.className = "sync-toast";
+    el.textContent = message;
+    document.body.appendChild(el);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.remove(); }, 4000);
+  }
+
+  window.addEventListener("storage", function (e) {
+    if (e.key !== STORAGE_KEY) return;
+
+    if (state.editMode) {
+      // Don't wipe out half-typed edits — tell them instead.
+      showSyncToast("Updated in another tab. Save or cancel to see the change.");
+      return;
+    }
+    state.data = loadData();
+    render();
+    showSyncToast("Dashboard updated");
+  });
 
   render();
 })();
