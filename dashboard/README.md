@@ -7,9 +7,8 @@ Welfare. Pure static HTML/CSS/JS — no server, database, or paid backend
 required. Works on low-end devices and slow connections.
 
 All data shipped in this folder is **sample/dummy data** clearly labeled
-as such ("Sample Field Artillery Regiment", "Sample Unit — Sub-Unit A",
-etc.). Replace it with real data before operational use, following the
-notes below.
+as such. Replace values with real data before operational use, following
+the notes below.
 
 ## Files
 

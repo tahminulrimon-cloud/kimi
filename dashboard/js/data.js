@@ -1,5 +1,5 @@
 /*
- * UNIT DASHBOARD — SAMPLE DATA FILE
+ * ADHOC 47 MORTAR REGIMENT — DASHBOARD DATA FILE
  * -----------------------------------------------------------------------
  * This file is the single source of truth for the dashboard. It contains
  * ONLY sample/dummy entries — no real unit data. Replace values below with
@@ -24,10 +24,10 @@
 
 window.DEFAULT_DATA = {
   meta: {
-    unitName: "Sample Field Artillery Regiment (Mortar)",
+    unitName: "Adhoc 47 Mortar Regiment",
     subtitle: "Unit Status Dashboard — Internal Use Only",
-    lastUpdated: "2026-08-03",
-    updatedBy: "Adjutant, Sample Regt"
+    lastUpdated: "2026-08-04",
+    updatedBy: "Adjutant, 47 Mortar Regt"
   },
 
   // 1. OPERATIONAL READINESS & COMBAT EFFECTIVENESS
@@ -49,10 +49,10 @@ window.DEFAULT_DATA = {
     ],
     manning: { authorized: 650, actual: 588 },
     subunits: [
-      { name: "Sample Unit — Sub-Unit A (Battery A)", rating: "green" },
-      { name: "Sample Unit — Sub-Unit B (Battery B)", rating: "amber" },
-      { name: "Sample Unit — Sub-Unit C (Battery C)", rating: "green" },
-      { name: "Sample Unit — HQ Battery", rating: "green" }
+      { name: "Battery A", rating: "green" },
+      { name: "Battery B", rating: "amber" },
+      { name: "Battery C", rating: "green" },
+      { name: "HQ Battery", rating: "green" }
     ]
   },
 
@@ -135,9 +135,9 @@ window.DEFAULT_DATA = {
     ],
     budget: { allocated: 100, utilised: 68 },
     fleetHealth: [
-      { name: "Sample Unit — Sub-Unit A", rating: "green" },
-      { name: "Sample Unit — Sub-Unit B", rating: "amber" },
-      { name: "Sample Unit — Sub-Unit C", rating: "green" }
+      { name: "Battery A", rating: "green" },
+      { name: "Battery B", rating: "amber" },
+      { name: "Battery C", rating: "green" }
     ]
   },
 
