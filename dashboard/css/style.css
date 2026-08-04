@@ -416,6 +416,58 @@ select.editable-input { cursor: pointer; }
   text-align: center;
 }
 
+/* ---------- Commander's actions ---------- */
+.due-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.due-chip.overdue {
+  background: var(--red-bg);
+  border-color: var(--red);
+  color: var(--red);
+}
+.due-chip.soon {
+  background: var(--amber-bg);
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.due-chip.none { font-style: italic; }
+
+tr.row-overdue td { background: rgba(248, 81, 73, 0.07); }
+
+.count-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.count-box {
+  flex: 1 1 90px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 10px;
+  text-align: center;
+}
+.count-box.bad { border-color: var(--red); background: var(--red-bg); }
+.count-box.warn { border-color: var(--amber); background: var(--amber-bg); }
+.count-n { font-size: 1.7rem; font-weight: 700; line-height: 1.1; }
+.count-l { font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
+
+.action-alert {
+  grid-column: 1 / -1;
+  border-color: var(--amber);
+  cursor: pointer;
+}
+.action-alert:hover { border-color: var(--accent-2); }
+.action-alert .card-header h3 { margin: 0; font-size: 1.02rem; }
+
 /* ---------- Admin sign-in ---------- */
 .login-backdrop {
   display: none;
@@ -534,6 +586,16 @@ select.editable-input { cursor: pointer; }
   .badge.green { color: #16691f; background: #e4f7e6; }
   .badge.amber { color: #7a5c00; background: #fff2cc; }
   .badge.red { color: #8a1c17; background: #fbe1df; }
+  /* the olive-on-dark chips and tiles need paper equivalents */
+  .due-chip { background: #fff; border-color: #999; color: #333; }
+  .due-chip.overdue { color: #8a1c17; background: #fbe1df; border-color: #8a1c17; }
+  .due-chip.soon { color: #7a5c00; background: #fff2cc; border-color: #7a5c00; }
+  .count-box { background: #fff; border-color: #999; }
+  .count-box .count-l { color: #444; }
+  .count-box.bad { background: #fbe1df; border-color: #8a1c17; }
+  .count-box.warn { background: #fff2cc; border-color: #7a5c00; }
+  tr.row-overdue td { background: #fdf2f1; }
+  .action-alert { border-color: #999; }
   .section { display: none !important; }
   .section.printing { display: block !important; }
 }

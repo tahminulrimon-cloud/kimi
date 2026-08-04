@@ -162,5 +162,54 @@ window.DEFAULT_DATA = {
       { item: "Family Welfare Programme", status: "green", note: "Quarterly get-together held" },
       { item: "Library / Recreation Room Upgrade", status: "amber", note: "In progress" }
     ]
+  },
+
+  // 6. COMMANDER'S ACTION TRACKER
+  // Items needing command attention that cut across the five categories
+  // above, so nothing falls between them. Each item has an owner and a
+  // due date; "Overdue" is worked out from the date automatically, so
+  // keep the dates accurate. Remove an item (Edit Mode → x) once closed.
+  //
+  // Dates must be written as YYYY-MM-DD, e.g. 2026-09-15.
+  actions: {
+    overall: "amber",
+    summary: "Two actions overdue; smoke ammunition indent is the priority for command attention.",
+    items: [
+      {
+        item: "Smoke ammunition indent — follow up with Bde",
+        owner: "Sample — Quartermaster",
+        due: "2026-07-20",
+        status: "red",
+        note: "Holding at 38% of scale; indent raised, no issue date yet"
+      },
+      {
+        item: "Combined Arms Exercise — obtain range allotment",
+        owner: "Sample — Adjutant",
+        due: "2026-07-28",
+        status: "red",
+        note: "Blocking collective training milestone"
+      },
+      {
+        item: "Two vehicle deficiencies — spares demand",
+        owner: "Sample — MTO",
+        due: "2026-08-07",
+        status: "amber",
+        note: "Awaiting critical vehicle spares"
+      },
+      {
+        item: "JCO promotion cadre nominations — confirm",
+        owner: "Sample — Subedar Major",
+        due: "2026-08-15",
+        status: "amber",
+        note: "Three nominations pending confirmation"
+      },
+      {
+        item: "Sub-Unit B barrack renovation — completion",
+        owner: "Sample — 2IC",
+        due: "2026-09-30",
+        status: "green",
+        note: "60% complete, on programme"
+      }
+    ]
   }
 };
