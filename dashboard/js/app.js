@@ -12,6 +12,30 @@
     { id: "welfare", label: "Welfare & Living Standard", icon: "&#9974;" }
   ];
 
+  // Blank template used when the admin adds a new row to a list. The key is
+  // the path to the list in the data file; the value is the shape of one entry.
+  // To add a new tracked list, add its path and default entry here.
+  var LIST_SCHEMAS = {
+    "readiness.equipment": { name: "New equipment", serviceable: 0, total: 0, status: "green" },
+    "readiness.ammunition": { type: "New ammunition type", status: "green", note: "" },
+    "readiness.subunits": { name: "New sub-unit", rating: "green" },
+    "training.courses": { name: "New course", category: "", completed: 0, pending: 0, status: "green" },
+    "training.collectiveTraining": { name: "New training activity", status: "green", note: "" },
+    "training.qualifications": { name: "New qualification", value: 0, target: 0 },
+    "training.upcoming": { event: "New event", date: "", status: "green" },
+    "admin.strengthReturns": { category: "New category", count: 0 },
+    "admin.keyAppointments": { post: "New appointment", note: "", status: "green" },
+    "admin.pendingActions": { item: "New action", note: "", status: "green" },
+    "admin.compliance": { item: "New document / requirement", status: "green" },
+    "maintenance.schedule": { equipment: "New equipment", lastService: "", nextDue: "", status: "green" },
+    "maintenance.backlog": { item: "New backlog item", note: "", status: "green" },
+    "maintenance.spares": { name: "New spares category", value: 0, target: 0 },
+    "maintenance.fleetHealth": { name: "New sub-unit", rating: "green" },
+    "welfare.accommodation": { item: "New facility", note: "", status: "green" },
+    "welfare.medical": { item: "New indicator", note: "", status: "green" },
+    "welfare.recreation": { item: "New facility / activity", note: "", status: "green" }
+  };
+
   var state = {
     data: loadData(),
     editMode: false,
@@ -82,18 +106,44 @@
     return '<input class="editable-input" type="' + type + '" data-path="' + path + '" value="' + escapeHtml(String(value)) + '">';
   }
 
+  // Percentage guarded against a zero/absent denominator — newly added rows
+  // start at 0 / 0, which would otherwise produce NaN and a full-width bar.
+  function pct(value, target) {
+    if (!target || target <= 0) return 0;
+    return Math.min(100, Math.round((value / target) * 100));
+  }
+
   function progressBar(value, target, status) {
-    var pct = target > 0 ? Math.min(100, Math.round((value / target) * 100)) : 0;
+    var filled = pct(value, target);
     return (
       '<div class="progress-row">' +
-        '<div class="label"><span>' + value + ' / ' + target + '</span><span>' + pct + '%</span></div>' +
-        '<div class="progress-track"><div class="progress-fill ' + status + '" style="width:' + pct + '%"></div></div>' +
+        '<div class="label"><span>' + value + ' / ' + target + '</span><span>' + filled + '%</span></div>' +
+        '<div class="progress-track"><div class="progress-fill ' + status + '" style="width:' + filled + '%"></div></div>' +
       '</div>'
     );
   }
 
   function card(inner, extraClass) {
     return '<div class="card' + (extraClass ? " " + extraClass : "") + '">' + inner + '</div>';
+  }
+
+  // "+ Add" button shown under a list while in Edit Mode.
+  function addBtn(listPath, label) {
+    if (!state.editMode) return "";
+    return '<button class="btn btn-add" data-add="' + listPath + '">&#43; Add ' + (label || "row") + '</button>';
+  }
+
+  // "✕" button that removes one entry from a list while in Edit Mode.
+  function delBtn(listPath, index) {
+    if (!state.editMode) return "";
+    return '<button class="btn-del" data-del="' + listPath + '" data-idx="' + index +
+           '" title="Remove this row" aria-label="Remove this row">&#10005;</button>';
+  }
+
+  // Table variants — the delete control needs its own column.
+  function delTh() { return state.editMode ? "<th></th>" : ""; }
+  function delTd(listPath, index) {
+    return state.editMode ? "<td>" + delBtn(listPath, index) + "</td>" : "";
   }
 
   // ---------------- section renderers ----------------
@@ -148,17 +198,20 @@
           '<td>' + textField(pfx + ".serviceable", e.serviceable, "number") + ' / ' + textField(pfx + ".total", e.total, "number") + '</td>' +
           '<td style="min-width:110px;">' +
             '<div class="progress-track" style="width:100px;display:inline-block;vertical-align:middle;">' +
-              '<div class="progress-fill ' + e.status + '" style="width:' + Math.min(100, Math.round((e.serviceable / e.total) * 100)) + '%"></div>' +
+              '<div class="progress-fill ' + e.status + '" style="width:' + pct(e.serviceable, e.total) + '%"></div>' +
             '</div>' +
           '</td>' +
           '<td>' + statusField(pfx + ".status", e.status) + '</td>' +
+          delTd("readiness.equipment", i) +
         '</tr>'
       );
     }).join("");
 
     var equipCard = card(
       '<h3>Equipment Serviceability</h3>' +
-      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Equipment</th><th>Serviceable</th><th>Ratio</th><th>Status</th></tr></thead><tbody>' + equipRows + '</tbody></table></div>'
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Equipment</th><th>Serviceable</th><th>Ratio</th><th>Status</th>' + delTh() + '</tr></thead><tbody>' + equipRows + '</tbody></table></div>' +
+      addBtn("readiness.equipment", "equipment"),
+      "card-wide"
     );
 
     var ammoRows = r.ammunition.map(function (a, i) {
@@ -166,14 +219,14 @@
       return (
         '<div class="item-row">' +
           '<div><div class="name">' + textField(pfx + ".type", a.type) + '</div><div class="note">' + textField(pfx + ".note", a.note) + '</div></div>' +
-          statusField(pfx + ".status", a.status) +
+          '<div class="row-controls">' + statusField(pfx + ".status", a.status) + delBtn("readiness.ammunition", i) + '</div>' +
         '</div>'
       );
     }).join("");
 
-    var ammoCard = card('<h3>Ammunition State</h3>' + ammoRows);
+    var ammoCard = card('<h3>Ammunition State</h3>' + ammoRows + addBtn("readiness.ammunition", "ammunition type"));
 
-    var manningPct = Math.round((r.manning.actual / r.manning.authorized) * 100);
+    var manningPct = pct(r.manning.actual, r.manning.authorized);
     var manningStatus = manningPct >= 90 ? "green" : manningPct >= 75 ? "amber" : "red";
     var manningCard = card(
       '<h3>Manning Level vs Authorised Strength</h3>' +
@@ -184,9 +237,10 @@
 
     var subRows = r.subunits.map(function (s, i) {
       var pfx = "readiness.subunits." + i;
-      return '<div class="item-row"><div class="name">' + textField(pfx + ".name", s.name) + '</div>' + statusField(pfx + ".rating", s.rating) + '</div>';
+      return '<div class="item-row"><div class="name">' + textField(pfx + ".name", s.name) + '</div>' +
+        '<div class="row-controls">' + statusField(pfx + ".rating", s.rating) + delBtn("readiness.subunits", i) + '</div></div>';
     }).join("");
-    var subCard = card('<h3>Readiness Rating by Sub-Unit</h3>' + subRows);
+    var subCard = card('<h3>Readiness Rating by Sub-Unit</h3>' + subRows + addBtn("readiness.subunits", "sub-unit"));
 
     return (
       '<div class="grid">' + overall + '</div>' +
@@ -210,38 +264,43 @@
           '<td>' + textField(pfx + ".completed", c.completed, "number") + '</td>' +
           '<td>' + textField(pfx + ".pending", c.pending, "number") + '</td>' +
           '<td>' + statusField(pfx + ".status", c.status) + '</td>' +
+          delTd("training.courses", i) +
         '</tr>'
       );
     }).join("");
     var coursesCard = card(
       '<h3>Courses — Completed vs Pending</h3>' +
-      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Course</th><th>Applies To</th><th>Completed</th><th>Pending</th><th>Status</th></tr></thead><tbody>' + courseRows + '</tbody></table></div>'
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Course</th><th>Applies To</th><th>Completed</th><th>Pending</th><th>Status</th>' + delTh() + '</tr></thead><tbody>' + courseRows + '</tbody></table></div>' +
+      addBtn("training.courses", "course"),
+      "card-wide"
     );
 
     var collRows = t.collectiveTraining.map(function (c, i) {
       var pfx = "training.collectiveTraining." + i;
-      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".name", c.name) + '</div><div class="note">' + textField(pfx + ".note", c.note) + '</div></div>' + statusField(pfx + ".status", c.status) + '</div>';
+      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".name", c.name) + '</div><div class="note">' + textField(pfx + ".note", c.note) + '</div></div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", c.status) + delBtn("training.collectiveTraining", i) + '</div></div>';
     }).join("");
-    var collCard = card('<h3>Individual & Collective Training</h3>' + collRows);
+    var collCard = card('<h3>Individual &amp; Collective Training</h3>' + collRows + addBtn("training.collectiveTraining", "activity"));
 
     var qualCards = t.qualifications.map(function (q, i) {
       var pfx = "training.qualifications." + i;
       var status = q.value / q.target >= 0.9 ? "green" : q.value / q.target >= 0.7 ? "amber" : "red";
       return (
         '<div class="progress-row">' +
-          '<div class="label"><span>' + textField(pfx + ".name", q.name) + '</span></div>' +
+          '<div class="label"><span>' + textField(pfx + ".name", q.name) + '</span>' + delBtn("training.qualifications", i) + '</div>' +
           '<div style="display:flex;gap:6px;align-items:center;margin:4px 0;">' + textField(pfx + ".value", q.value, "number") + ' / ' + textField(pfx + ".target", q.target, "number") + '</div>' +
           progressBar(q.value, q.target, status) +
         '</div>'
       );
     }).join("");
-    var qualCard = card('<h3>Certification / Qualification Tracking</h3>' + qualCards);
+    var qualCard = card('<h3>Certification / Qualification Tracking</h3>' + qualCards + addBtn("training.qualifications", "qualification"));
 
     var upRows = t.upcoming.map(function (u, i) {
       var pfx = "training.upcoming." + i;
-      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".event", u.event) + '</div><div class="note">' + textField(pfx + ".date", u.date, "date") + '</div></div>' + statusField(pfx + ".status", u.status) + '</div>';
+      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".event", u.event) + '</div><div class="note">' + textField(pfx + ".date", u.date, "date") + '</div></div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", u.status) + delBtn("training.upcoming", i) + '</div></div>';
     }).join("");
-    var upCard = card('<h3>Upcoming Exercises / Study Periods</h3>' + upRows);
+    var upCard = card('<h3>Upcoming Exercises / Study Periods</h3>' + upRows + addBtn("training.upcoming", "event"));
 
     return (
       '<div class="grid">' + overall + '</div>' +
@@ -258,27 +317,31 @@
 
     var srRows = a.strengthReturns.map(function (s, i) {
       var pfx = "admin.strengthReturns." + i;
-      return '<div class="item-row"><div class="name">' + textField(pfx + ".category", s.category) + '</div><div class="stat-big" style="font-size:1.2rem;">' + textField(pfx + ".count", s.count, "number") + '</div></div>';
+      return '<div class="item-row"><div class="name">' + textField(pfx + ".category", s.category) + '</div>' +
+        '<div class="row-controls"><div class="stat-big" style="font-size:1.2rem;">' + textField(pfx + ".count", s.count, "number") + '</div>' + delBtn("admin.strengthReturns", i) + '</div></div>';
     }).join("");
-    var srCard = card('<h3>Strength Returns</h3>' + srRows);
+    var srCard = card('<h3>Strength Returns</h3>' + srRows + addBtn("admin.strengthReturns", "category"));
 
     var keyRows = a.keyAppointments.map(function (k, i) {
       var pfx = "admin.keyAppointments." + i;
-      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".post", k.post) + '</div><div class="note">' + textField(pfx + ".note", k.note) + '</div></div>' + statusField(pfx + ".status", k.status) + '</div>';
+      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".post", k.post) + '</div><div class="note">' + textField(pfx + ".note", k.note) + '</div></div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", k.status) + delBtn("admin.keyAppointments", i) + '</div></div>';
     }).join("");
-    var keyCard = card('<h3>Key Appointments & Vacancies</h3>' + keyRows);
+    var keyCard = card('<h3>Key Appointments &amp; Vacancies</h3>' + keyRows + addBtn("admin.keyAppointments", "appointment"));
 
     var pendRows = a.pendingActions.map(function (p, i) {
       var pfx = "admin.pendingActions." + i;
-      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".item", p.item) + '</div><div class="note">' + textField(pfx + ".note", p.note) + '</div></div>' + statusField(pfx + ".status", p.status) + '</div>';
+      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".item", p.item) + '</div><div class="note">' + textField(pfx + ".note", p.note) + '</div></div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", p.status) + delBtn("admin.pendingActions", i) + '</div></div>';
     }).join("");
-    var pendCard = card('<h3>Pending Administrative Actions</h3>' + pendRows);
+    var pendCard = card('<h3>Pending Administrative Actions</h3>' + pendRows + addBtn("admin.pendingActions", "action"));
 
     var compRows = a.compliance.map(function (c, i) {
       var pfx = "admin.compliance." + i;
-      return '<div class="item-row"><div class="name">' + textField(pfx + ".item", c.item) + '</div>' + statusField(pfx + ".status", c.status) + '</div>';
+      return '<div class="item-row"><div class="name">' + textField(pfx + ".item", c.item) + '</div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", c.status) + delBtn("admin.compliance", i) + '</div></div>';
     }).join("");
-    var compCard = card('<h3>Documentation / Compliance Status</h3>' + compRows);
+    var compCard = card('<h3>Documentation / Compliance Status</h3>' + compRows + addBtn("admin.compliance", "item"));
 
     return (
       '<div class="grid">' + overall + '</div>' +
@@ -301,34 +364,38 @@
           '<td>' + textField(pfx + ".lastService", s.lastService, "date") + '</td>' +
           '<td>' + textField(pfx + ".nextDue", s.nextDue, "date") + '</td>' +
           '<td>' + statusField(pfx + ".status", s.status) + '</td>' +
+          delTd("maintenance.schedule", i) +
         '</tr>'
       );
     }).join("");
     var schedCard = card(
       '<h3>Maintenance Schedule</h3>' +
-      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Equipment</th><th>Last Service</th><th>Next Due</th><th>Status</th></tr></thead><tbody>' + schedRows + '</tbody></table></div>'
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Equipment</th><th>Last Service</th><th>Next Due</th><th>Status</th>' + delTh() + '</tr></thead><tbody>' + schedRows + '</tbody></table></div>' +
+      addBtn("maintenance.schedule", "equipment"),
+      "card-wide"
     );
 
     var backRows = m.backlog.map(function (b, i) {
       var pfx = "maintenance.backlog." + i;
-      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".item", b.item) + '</div><div class="note">' + textField(pfx + ".note", b.note) + '</div></div>' + statusField(pfx + ".status", b.status) + '</div>';
+      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".item", b.item) + '</div><div class="note">' + textField(pfx + ".note", b.note) + '</div></div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", b.status) + delBtn("maintenance.backlog", i) + '</div></div>';
     }).join("");
-    var backCard = card('<h3>Maintenance Backlog</h3>' + backRows);
+    var backCard = card('<h3>Maintenance Backlog</h3>' + backRows + addBtn("maintenance.backlog", "backlog item"));
 
     var spareCards = m.spares.map(function (s, i) {
       var pfx = "maintenance.spares." + i;
       var status = s.value / s.target >= 0.85 ? "green" : s.value / s.target >= 0.6 ? "amber" : "red";
       return (
         '<div class="progress-row">' +
-          '<div class="label"><span>' + textField(pfx + ".name", s.name) + '</span></div>' +
+          '<div class="label"><span>' + textField(pfx + ".name", s.name) + '</span>' + delBtn("maintenance.spares", i) + '</div>' +
           '<div style="display:flex;gap:6px;align-items:center;margin:4px 0;">' + textField(pfx + ".value", s.value, "number") + ' / ' + textField(pfx + ".target", s.target, "number") + '</div>' +
           progressBar(s.value, s.target, status) +
         '</div>'
       );
     }).join("");
-    var sparesCard = card('<h3>Spares / Stores Availability</h3>' + spareCards);
+    var sparesCard = card('<h3>Spares / Stores Availability</h3>' + spareCards + addBtn("maintenance.spares", "spares category"));
 
-    var budgetPct = Math.round((m.budget.utilised / m.budget.allocated) * 100);
+    var budgetPct = pct(m.budget.utilised, m.budget.allocated);
     var budgetStatus = budgetPct <= 85 ? "green" : budgetPct <= 100 ? "amber" : "red";
     var budgetCard = card(
       '<h3>Budget / Resource Utilisation</h3>' +
@@ -339,9 +406,10 @@
 
     var fleetRows = m.fleetHealth.map(function (f, i) {
       var pfx = "maintenance.fleetHealth." + i;
-      return '<div class="item-row"><div class="name">' + textField(pfx + ".name", f.name) + '</div>' + statusField(pfx + ".rating", f.rating) + '</div>';
+      return '<div class="item-row"><div class="name">' + textField(pfx + ".name", f.name) + '</div>' +
+        '<div class="row-controls">' + statusField(pfx + ".rating", f.rating) + delBtn("maintenance.fleetHealth", i) + '</div></div>';
     }).join("");
-    var fleetCard = card('<h3>Vehicle & Weapon Fleet Health</h3>' + fleetRows);
+    var fleetCard = card('<h3>Vehicle &amp; Weapon Fleet Health</h3>' + fleetRows + addBtn("maintenance.fleetHealth", "sub-unit"));
 
     return (
       '<div class="grid">' + overall + '</div>' +
@@ -358,11 +426,12 @@
 
     var accRows = w.accommodation.map(function (a, i) {
       var pfx = "welfare.accommodation." + i;
-      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".item", a.item) + '</div><div class="note">' + textField(pfx + ".note", a.note) + '</div></div>' + statusField(pfx + ".status", a.status) + '</div>';
+      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".item", a.item) + '</div><div class="note">' + textField(pfx + ".note", a.note) + '</div></div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", a.status) + delBtn("welfare.accommodation", i) + '</div></div>';
     }).join("");
-    var accCard = card('<h3>Accommodation & Mess Status</h3>' + accRows);
+    var accCard = card('<h3>Accommodation &amp; Mess Status</h3>' + accRows + addBtn("welfare.accommodation", "facility"));
 
-    var fundPct = Math.round((w.welfareFund.balance / w.welfareFund.target) * 100);
+    var fundPct = pct(w.welfareFund.balance, w.welfareFund.target);
     var fundStatus = fundPct >= 80 ? "green" : fundPct >= 50 ? "amber" : "red";
     var fundCard = card(
       '<h3>Welfare Fund Status</h3>' +
@@ -373,15 +442,17 @@
 
     var medRows = w.medical.map(function (m, i) {
       var pfx = "welfare.medical." + i;
-      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".item", m.item) + '</div><div class="note">' + textField(pfx + ".note", m.note) + '</div></div>' + statusField(pfx + ".status", m.status) + '</div>';
+      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".item", m.item) + '</div><div class="note">' + textField(pfx + ".note", m.note) + '</div></div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", m.status) + delBtn("welfare.medical", i) + '</div></div>';
     }).join("");
-    var medCard = card('<h3>Medical / Health Indicators</h3>' + medRows);
+    var medCard = card('<h3>Medical / Health Indicators</h3>' + medRows + addBtn("welfare.medical", "indicator"));
 
     var recRows = w.recreation.map(function (r, i) {
       var pfx = "welfare.recreation." + i;
-      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".item", r.item) + '</div><div class="note">' + textField(pfx + ".note", r.note) + '</div></div>' + statusField(pfx + ".status", r.status) + '</div>';
+      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".item", r.item) + '</div><div class="note">' + textField(pfx + ".note", r.note) + '</div></div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", r.status) + delBtn("welfare.recreation", i) + '</div></div>';
     }).join("");
-    var recCard = card("<h3>Recreation & Family Welfare</h3>" + recRows);
+    var recCard = card("<h3>Recreation &amp; Family Welfare</h3>" + recRows + addBtn("welfare.recreation", "facility"));
 
     return (
       '<div class="grid">' + overall + '</div>' +
@@ -431,6 +502,16 @@
 
     document.getElementById("content").innerHTML = RENDERERS[state.route]();
     closeSidebar();
+  }
+
+  // After adding a row, put the cursor in its first field so the admin can
+  // start typing straight away instead of hunting for the new blank row.
+  function focusLastRow(listPath, index) {
+    var first = document.querySelector('[data-path^="' + listPath + "." + index + '."]');
+    if (!first) return;
+    first.focus();
+    if (typeof first.select === "function") first.select();
+    first.scrollIntoView({ block: "center" });
   }
 
   function collectEdits() {
@@ -486,6 +567,35 @@
 
   // ---------------- events ----------------
   document.addEventListener("click", function (e) {
+    // Add a blank row to a list. Edits typed but not yet saved are collected
+    // first so re-rendering does not throw them away.
+    var addEl = e.target.closest("[data-add]");
+    if (addEl) {
+      var addPath = addEl.getAttribute("data-add");
+      var schema = LIST_SCHEMAS[addPath];
+      if (!schema) return;
+      collectEdits();
+      var list = getByPath(state.data, addPath);
+      list.push(JSON.parse(JSON.stringify(schema)));
+      render();
+      focusLastRow(addPath, list.length - 1);
+      return;
+    }
+
+    var delEl = e.target.closest("[data-del]");
+    if (delEl) {
+      var delPath = delEl.getAttribute("data-del");
+      var idx = Number(delEl.getAttribute("data-idx"));
+      collectEdits();
+      if (!confirm("Remove this row? It will be gone once you click Save Changes.")) {
+        render();
+        return;
+      }
+      getByPath(state.data, delPath).splice(idx, 1);
+      render();
+      return;
+    }
+
     var navBtn = e.target.closest("[data-nav]");
     if (navBtn) {
       location.hash = navBtn.getAttribute("data-nav");
@@ -504,6 +614,7 @@
         location.hash = state.route;
         return;
       }
+      state.data = loadData();
       state.editMode = false;
     }
     render();
@@ -521,6 +632,9 @@
   });
 
   document.getElementById("cancelEditBtn").addEventListener("click", function () {
+    // Adding/removing rows mutates state.data before Save, so Cancel has to
+    // reload the last saved copy rather than just leaving edit mode.
+    state.data = loadData();
     state.editMode = false;
     render();
   });

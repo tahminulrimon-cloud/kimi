@@ -32,10 +32,24 @@ person responsible for keeping it current.
    to update.
 2. Click **Edit Mode** (top right). Fields turn into text boxes and
    status dropdowns (Green / Amber / Red).
-3. Make your changes, then click **Save Changes**.
-4. Your edits are saved in the browser's local storage on that device
+3. Make your changes:
+   - **Edit** — type over any value, or pick a new status from the dropdown.
+   - **Insert** — click the dashed **+ Add …** button at the bottom of any
+     list or table (e.g. "+ Add equipment", "+ Add course", "+ Add sub-unit").
+     A blank row appears with the cursor already in its first field.
+   - **Remove** — click the **✕** at the end of a row. You will be asked to
+     confirm.
+4. Click **Save Changes**. Nothing is written until you do — **Cancel**
+   discards everything, including rows you added or removed.
+5. Your edits are saved in the browser's local storage on that device
    and will still be there next time you open the page on the *same*
    browser/device.
+
+> **Note on access.** This is a static site with no server, so "admin" here
+> means whoever is using the browser — Edit Mode is not password-protected
+> and cannot be, without a backend. Control who can change the figures by
+> controlling who can reach the page (internal share, private host, or an
+> access-controlled intranet).
 
 Because Edit Mode saves to the browser only, it does **not** automatically
 sync to other people's phones/computers. To share updates:
@@ -111,6 +125,9 @@ useful for paper briefs and files where a screen isn't available.
 ## Notes for whoever maintains this
 
 - Status values are always one of: `green`, `amber`, `red`.
+- The blank row that **+ Add** inserts is defined by `LIST_SCHEMAS` near the
+  top of `js/app.js`. If you add a brand-new list to `js/data.js`, add a
+  matching entry there so the Add button knows what shape a new row is.
 - The Overview page's five summary cards automatically reflect whatever
   `overall` status is set in each category in `data.js` (or via Edit
   Mode) — you do not need to separately update the Overview.

@@ -1,18 +1,20 @@
 :root {
-  --bg: #0e1620;
-  --panel: #16212c;
-  --panel-2: #1c2a37;
-  --border: #263340;
-  --text: #e8edf2;
-  --muted: #93a2b0;
-  --accent: #8a9a5b;
-  --accent-2: #b8c48a;
-  --green: #3fb950;
-  --green-bg: rgba(63, 185, 80, 0.14);
-  --amber: #d4a72c;
-  --amber-bg: rgba(212, 167, 44, 0.16);
-  --red: #e5534b;
-  --red-bg: rgba(229, 83, 75, 0.16);
+  /* Military olive-drab palette */
+  --bg: #171a10;
+  --panel: #222719;
+  --panel-2: #2d331f;
+  --border: #3e4629;
+  --text: #eaeedd;
+  --muted: #a5ad8a;
+  --accent: #7d8b4f;
+  --accent-2: #a3b46a;
+  --on-accent: #12160a;
+  --green: #56d364;
+  --green-bg: rgba(86, 211, 100, 0.15);
+  --amber: #e3b341;
+  --amber-bg: rgba(227, 179, 65, 0.16);
+  --red: #f85149;
+  --red-bg: rgba(248, 81, 73, 0.16);
   --radius: 10px;
   --sidebar-w: 240px;
 }
@@ -74,7 +76,7 @@ a { color: var(--accent-2); }
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: #10160c;
+  color: var(--on-accent);
   flex-shrink: 0;
 }
 
@@ -116,7 +118,7 @@ a { color: var(--accent-2); }
 .nav-btn:hover { background: var(--panel-2); }
 .nav-btn.active {
   background: var(--accent);
-  color: #10160c;
+  color: var(--on-accent);
   font-weight: 600;
 }
 .nav-btn .dot {
@@ -170,7 +172,7 @@ a { color: var(--accent-2); }
 .btn-primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #10160c;
+  color: var(--on-accent);
   font-weight: 600;
 }
 .btn-primary:hover { background: var(--accent-2); }
@@ -203,6 +205,10 @@ a { color: var(--accent-2); }
 .card h2, .card h3 {
   margin-top: 0;
 }
+
+/* Cards holding a wide table span the full grid row so every column —
+   including Status and the edit-mode delete control — stays visible. */
+.card-wide { grid-column: 1 / -1; }
 
 .card-header {
   display: flex;
@@ -322,7 +328,52 @@ table.data-table td input[type="number"].editable-input {
   width: 100%;
   min-width: 60px;
 }
+.editable-input:focus {
+  outline: 2px solid var(--accent-2);
+  outline-offset: -1px;
+}
 select.editable-input { cursor: pointer; }
+
+/* ---------- Edit-mode row controls ---------- */
+.btn-add {
+  margin-top: 12px;
+  border-style: dashed;
+  color: var(--accent-2);
+  border-color: var(--accent);
+  width: 100%;
+  justify-content: center;
+}
+.btn-add:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-style: solid;
+}
+
+.btn-del {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 5px 8px;
+  flex-shrink: 0;
+}
+.btn-del:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--red-bg);
+}
+
+/* keep the delete control snug against the row it belongs to */
+.item-row .btn-del { margin-left: 8px; }
+.row-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* keep "Green"/"Amber"/"Red" fully readable in the narrower list cards */
+.row-controls select.editable-input { min-width: 92px; }
 
 .two-col {
   display: grid;
@@ -338,6 +389,20 @@ select.editable-input { cursor: pointer; }
   font-weight: 700;
 }
 .stat-sub { color: var(--muted); font-size: 0.85rem; }
+
+/* Inline number fields inside a headline stat stay on one line rather than
+   stretching to full width and stacking. */
+.stat-big .editable-input {
+  width: 6ch;
+  display: inline-block;
+  font-size: 1.4rem;
+  text-align: center;
+}
+.stat-sub .editable-input {
+  width: 7ch;
+  display: inline-block;
+  text-align: center;
+}
 
 .section-summary {
   color: var(--muted);
@@ -375,7 +440,8 @@ select.editable-input { cursor: pointer; }
 
 /* ---------- Print ---------- */
 @media print {
-  .sidebar, .topbar .actions, .hamburger, .edit-only-controls { display: none !important; }
+  .sidebar, .topbar .actions, .hamburger, .edit-only-controls,
+  .btn-add, .btn-del { display: none !important; }
   body, .app { background: #fff; color: #000; }
   .main { padding: 0; }
   .card { border: 1px solid #999; background: #fff; break-inside: avoid; }
