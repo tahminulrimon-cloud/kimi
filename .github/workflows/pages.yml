@@ -2,7 +2,7 @@ name: Deploy dashboard to GitHub Pages
 
 on:
   push:
-    branches: [claude/military-regiment-dashboard-6mmerl]
+    branches: [claude/unit-accounts-docs-review-lmahsb]
     paths:
       - "dashboard/**"
       - ".github/workflows/pages.yml"
