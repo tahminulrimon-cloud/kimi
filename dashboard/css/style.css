@@ -416,6 +416,33 @@ select.editable-input { cursor: pointer; }
   text-align: center;
 }
 
+/* ---------- Sidebar groups ---------- */
+.nav-group {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  font-weight: 700;
+  padding: 14px 12px 4px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+}
+.nav-group:first-child { border-top: none; margin-top: 0; }
+
+/* ---------- Notice / caveat cards ---------- */
+.notice-card {
+  grid-column: 1 / -1;
+  border-left: 3px solid var(--amber);
+}
+.notice-card h3 { margin-bottom: 8px; }
+.notice-card .note { margin: 8px 0; }
+
+tr.row-total td {
+  border-top: 2px solid var(--border);
+  background: var(--panel-2);
+}
+tr.row-today td { background: rgba(227, 179, 65, 0.09); }
+
 /* ---------- Commander's actions ---------- */
 .due-chip {
   display: inline-block;
@@ -595,7 +622,9 @@ tr.row-overdue td { background: rgba(248, 81, 73, 0.07); }
   .count-box.bad { background: #fbe1df; border-color: #8a1c17; }
   .count-box.warn { background: #fff2cc; border-color: #7a5c00; }
   tr.row-overdue td { background: #fdf2f1; }
-  .action-alert { border-color: #999; }
+  tr.row-today td { background: #fffaeb; }
+  tr.row-total td { background: #f2f2f2; border-top-color: #999; }
+  .action-alert, .notice-card { border-color: #999; }
   .section { display: none !important; }
   .section.printing { display: block !important; }
 }

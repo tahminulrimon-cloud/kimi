@@ -7,6 +7,71 @@ Welfare — plus a **Commander's Action Tracker** that cuts across all five.
 Pure static HTML/CSS/JS — no server, database, or paid backend required.
 Works on low-end devices and slow connections.
 
+## Tabs
+
+Grouped in the sidebar:
+
+**Daily Operations** — Parade State, Vehicle Movement, Duty Roster,
+Critical Resources, Commitments
+**Unit Status** — Operational Readiness, Training, Administration,
+Maintenance, Welfare
+**Command** — Commander's Actions, Situational Awareness
+
+### Parade State
+
+Strength return by category with a **balance check**: posted should equal
+present + leave + sick + course + duty. Any row that doesn't balance is
+flagged as "N unaccounted" and a warning appears above the table, so a
+miscount is caught before it reaches the CO. Totals are calculated for you.
+Absentees are listed separately.
+
+### Vehicle Movement
+
+Log of vehicles out and back. Red = overdue against expected return,
+amber = out on task, green = returned. Overdue rows are tinted and counted.
+
+### Duty Roster
+
+Detailed duties sorted by date, with today's duty highlighted, plus a list
+of standing appointments and whether each is filled.
+
+### Critical Resources
+
+Sustainment view — fuel, ammunition, rations, water. Shows held vs
+authorised, a level bar, and **estimated days of supply** at current
+consumption. (Operational Readiness holds the ammunition *scale* view;
+this is the consumables view.)
+
+### Commitments
+
+Forthcoming events sorted soonest first, with lead and location. Anything
+within 14 days shows "In N days".
+
+### Situational Awareness
+
+⚠️ **Open-source summaries only.** For keeping the unit generally informed
+from publicly available reporting — news agencies, official statements,
+public advisories. Cite the outlet.
+
+**Do not enter** classified material, intelligence reports, source-derived
+information, operational plans, or anything with a security marking. This
+dashboard has no meaningful access control and may be reachable from the
+public internet. Assume anything written here can be read by anyone.
+
+### Welfare requests & grievances — not yet available
+
+An anonymous digital grievance box is **deliberately not built yet**. It
+needs shared storage every phone can reach; with data kept per-device a
+submitted message would stay on the sender's own phone and reach nobody.
+A box that looks like it works but silently goes nowhere is worse than no
+box, so the Welfare tab explains the position and points to the existing
+routes instead.
+
+When it is built, genuine anonymity must be designed in deliberately — no
+name, no account, no device identifier stored against a message, readable
+only by the welfare cell. A box that merely *looks* anonymous puts the
+sender at risk.
+
 ## Commander's Action Tracker
 
 The sixth tab holds items needing command attention that don't sit neatly
@@ -152,6 +217,24 @@ publishes via step 3. Others view, print, and report changes to them.
 > automatically, that needs a shared database and a login server. Both
 > Supabase and Firebase do this on a free tier — it is a change of
 > architecture, not a tweak, so ask if you want it.
+
+### Which tabs work well under the current (no-backend) model?
+
+Because data is per-device, the practical model is **one nominated person
+maintains the master copy and publishes it**; everyone else reads on their
+phone. That suits some tabs better than others:
+
+| Tab | Fits the publish model? |
+| --- | --- |
+| Parade State | **Yes** — compiled once daily by the duty clerk, then published |
+| Duty Roster | **Yes** — set for the week, rarely changes |
+| Commitments | **Yes** — changes infrequently |
+| Critical Resources | **Yes** — updated on a return |
+| Situational Awareness | **Yes** — curated by one person |
+| Unit Status categories | **Yes** — periodic returns |
+| Commander's Actions | **Mostly** — fine unless several people update at once |
+| **Vehicle Movement** | **Poorly** — wants many people writing all day, in real time. Usable as a single-writer log kept at the guard room, but it is the tab that most needs a shared backend |
+| **Anonymous grievance** | **Not possible** — see above |
 
 ### Option B — Edit `js/data.js` directly (updates the data for everyone)
 

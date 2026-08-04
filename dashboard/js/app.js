@@ -5,13 +5,30 @@
 
   var SECTIONS = [
     { id: "overview", label: "Overview", icon: "&#8962;" },
+
+    { group: "Daily Operations" },
+    { id: "parade", label: "Parade State", icon: "&#128101;" },
+    { id: "vehicles", label: "Vehicle Movement", icon: "&#128666;" },
+    { id: "duty", label: "Duty Roster", icon: "&#128337;" },
+    { id: "resources", label: "Critical Resources", icon: "&#9981;" },
+    { id: "commitments", label: "Commitments", icon: "&#128197;" },
+
+    { group: "Unit Status" },
     { id: "readiness", label: "Operational Readiness", icon: "&#127919;" },
     { id: "training", label: "Training & Development", icon: "&#127891;" },
     { id: "admin", label: "Unit Administration", icon: "&#128203;" },
     { id: "maintenance", label: "Maintenance & Resources", icon: "&#128295;" },
     { id: "welfare", label: "Welfare & Living Standard", icon: "&#9974;" },
-    { id: "actions", label: "Commander's Actions", icon: "&#9873;" }
+
+    { group: "Command" },
+    { id: "actions", label: "Commander's Actions", icon: "&#9873;" },
+    { id: "situational", label: "Situational Awareness", icon: "&#127758;" }
   ];
+
+  // Navigable entries only — SECTIONS also carries group headings.
+  function sectionList() {
+    return SECTIONS.filter(function (s) { return s.id; });
+  }
 
   // Blank template used when the admin adds a new row to a list. The key is
   // the path to the list in the data file; the value is the shape of one entry.
@@ -35,7 +52,15 @@
     "welfare.accommodation": { item: "New facility", note: "", status: "green" },
     "welfare.medical": { item: "New indicator", note: "", status: "green" },
     "welfare.recreation": { item: "New facility / activity", note: "", status: "green" },
-    "actions.items": { item: "New action", owner: "", due: "", status: "amber", note: "" }
+    "actions.items": { item: "New action", owner: "", due: "", status: "amber", note: "" },
+    "parade.strength": { category: "New category", posted: 0, present: 0, leave: 0, sick: 0, course: 0, duty: 0 },
+    "parade.absentees": { name: "New entry", reason: "", since: "", status: "amber", note: "" },
+    "vehicles.movements": { vehicle: "New vehicle", driver: "", purpose: "", out: "", eta: "", status: "amber", note: "" },
+    "duty.roster": { date: "", duty: "New duty", name: "", contact: "", status: "green" },
+    "duty.standing": { duty: "New standing duty", holder: "", status: "amber", note: "" },
+    "resources.stocks": { item: "New item", held: 0, authorised: 0, unit: "", days: 0, status: "green" },
+    "commitments.items": { event: "New commitment", date: "", lead: "", location: "", status: "amber", note: "" },
+    "situational.updates": { date: "", headline: "New entry", area: "", source: "Open press", status: "green", note: "" }
   };
 
   var CFG = window.DASHBOARD_CONFIG || { REQUIRE_LOGIN: false };
@@ -163,7 +188,7 @@
 
   function currentRoute() {
     var h = (location.hash || "#overview").slice(1);
-    return SECTIONS.some(function (s) { return s.id === h; }) ? h : "overview";
+    return sectionList().some(function (s) { return s.id === h; }) ? h : "overview";
   }
 
   function badge(status) {
@@ -604,9 +629,28 @@
     }).join("");
     var recCard = card("<h3>Recreation &amp; Family Welfare</h3>" + recRows + addBtn("welfare.recreation", "facility"));
 
+    // Deliberately NOT a working submission form. A box that quietly saved a
+    // grievance to the sender's own phone would look like it had been sent
+    // while reaching nobody — worse than having no box at all. Anonymous
+    // submission needs shared storage; see README.
+    var grievCard =
+      '<div class="card notice-card">' +
+        '<h3>&#9993; Welfare requests &amp; grievances</h3>' +
+        '<p class="note">An <strong>anonymous digital grievance box is not yet available</strong>. It needs shared ' +
+        'storage that every phone can reach — this dashboard currently keeps its data on each device separately, so a ' +
+        'message submitted here would stay on the sender\'s own phone and reach nobody.</p>' +
+        '<p class="note">Rather than show a box that appears to work but does not, the feature is held back until the ' +
+        'shared database is enabled. Until then use the established routes: the unit welfare box, Subedar Major\'s ' +
+        'office, or Commanding Officer\'s interview.</p>' +
+        '<p class="note"><strong>Note on anonymity.</strong> When it is built, genuine anonymity has to be designed in ' +
+        'deliberately — no name, no account, no device identifier stored against a message, and readable only by the ' +
+        'welfare cell. A box that merely <em>looks</em> anonymous puts the sender at risk.</p>' +
+      '</div>';
+
     return (
       '<div class="grid">' + overall + '</div>' +
-      '<div class="grid" style="margin-top:16px;">' + accCard + fundCard + medCard + recCard + '</div>'
+      '<div class="grid" style="margin-top:16px;">' + accCard + fundCard + medCard + recCard + '</div>' +
+      '<div class="grid" style="margin-top:16px;">' + grievCard + '</div>'
     );
   }
 
@@ -685,6 +729,350 @@
     );
   }
 
+  // ---------------- daily operations ----------------
+  function renderParade() {
+    var p = state.data.parade;
+
+    var head = card(
+      '<div class="card-header"><h2>Parade State</h2>' + statusField("parade.overall", p.overall) + '</div>' +
+      '<div class="item-row"><span class="note">Parade date</span><span>' +
+        (state.editMode ? textField("parade.paradeDate", p.paradeDate, "date") : escapeHtml(p.paradeDate)) +
+      '</span></div>' +
+      '<p class="note">' + textField("parade.summary", p.summary) + '</p>'
+    );
+
+    // Running totals across all categories, and a per-row balance check.
+    var tot = { posted: 0, present: 0, leave: 0, sick: 0, course: 0, duty: 0 };
+    var unbalanced = 0;
+
+    var rows = p.strength.map(function (s, i) {
+      var pfx = "parade.strength." + i;
+      ["posted", "present", "leave", "sick", "course", "duty"].forEach(function (k) {
+        tot[k] += Number(s[k]) || 0;
+      });
+      var accounted = (Number(s.present) || 0) + (Number(s.leave) || 0) + (Number(s.sick) || 0) +
+                      (Number(s.course) || 0) + (Number(s.duty) || 0);
+      var diff = (Number(s.posted) || 0) - accounted;
+      if (diff !== 0) unbalanced++;
+      var flag = diff === 0
+        ? '<span class="due-chip">Balanced</span>'
+        : '<span class="due-chip overdue">' + (diff > 0 ? diff + " unaccounted" : Math.abs(diff) + " over") + '</span>';
+      return (
+        '<tr>' +
+          '<td>' + textField(pfx + ".category", s.category) + '</td>' +
+          '<td>' + textField(pfx + ".posted", s.posted, "number") + '</td>' +
+          '<td>' + textField(pfx + ".present", s.present, "number") + '</td>' +
+          '<td>' + textField(pfx + ".leave", s.leave, "number") + '</td>' +
+          '<td>' + textField(pfx + ".sick", s.sick, "number") + '</td>' +
+          '<td>' + textField(pfx + ".course", s.course, "number") + '</td>' +
+          '<td>' + textField(pfx + ".duty", s.duty, "number") + '</td>' +
+          '<td>' + flag + '</td>' +
+          delTd("parade.strength", i) +
+        '</tr>'
+      );
+    }).join("");
+
+    var totalRow =
+      '<tr class="row-total">' +
+        '<td><strong>Total</strong></td>' +
+        '<td><strong>' + tot.posted + '</strong></td>' +
+        '<td><strong>' + tot.present + '</strong></td>' +
+        '<td>' + tot.leave + '</td><td>' + tot.sick + '</td>' +
+        '<td>' + tot.course + '</td><td>' + tot.duty + '</td>' +
+        '<td></td>' + (state.editMode ? "<td></td>" : "") +
+      '</tr>';
+
+    var strengthCard = card(
+      '<h3>Strength Return</h3>' +
+      (unbalanced
+        ? '<p class="note" style="color:var(--red);">' + unbalanced + ' row(s) do not balance — posted should equal present + leave + sick + course + duty.</p>'
+        : "") +
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>' +
+        '<th>Category</th><th>Posted</th><th>Present</th><th>Leave</th><th>Sick</th><th>Course</th><th>Duty</th><th>Check</th>' + delTh() +
+      '</tr></thead><tbody>' + rows + totalRow + '</tbody></table></div>' +
+      addBtn("parade.strength", "category"),
+      "card-wide"
+    );
+
+    var presentPct = pct(tot.present, tot.posted);
+    var totalsCard = card(
+      '<h3>On Parade</h3>' +
+      '<div class="stat-big">' + tot.present + ' / ' + tot.posted + '</div>' +
+      '<div class="stat-sub">' + presentPct + '% of posted strength present</div>' +
+      progressBar(tot.present, tot.posted, presentPct >= 80 ? "green" : presentPct >= 65 ? "amber" : "red")
+    );
+
+    var absRows = p.absentees.map(function (a, i) {
+      var pfx = "parade.absentees." + i;
+      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".name", a.name) + '</div>' +
+        '<div class="note">' + textField(pfx + ".reason", a.reason) + '</div>' +
+        '<div class="note">' + (state.editMode ? textField(pfx + ".since", a.since, "date") : "Since " + escapeHtml(a.since || "—")) + '</div></div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", a.status) + delBtn("parade.absentees", i) + '</div></div>';
+    }).join("");
+    var absCard = card('<h3>Absentees &amp; Unaccounted</h3>' +
+      (absRows || '<p class="note">None recorded.</p>') + addBtn("parade.absentees", "entry"));
+
+    return (
+      '<div class="grid">' + head + totalsCard + absCard + '</div>' +
+      '<div class="grid" style="margin-top:16px;">' + strengthCard + '</div>'
+    );
+  }
+
+  function renderVehicles() {
+    var v = state.data.vehicles;
+    var out = v.movements.filter(function (m) { return m.status !== "green"; }).length;
+    var overdue = v.movements.filter(function (m) { return m.status === "red"; }).length;
+
+    var head = card(
+      '<div class="card-header"><h2>Vehicle Movement</h2>' + statusField("vehicles.overall", v.overall) + '</div>' +
+      '<p class="note">' + textField("vehicles.summary", v.summary) + '</p>'
+    );
+
+    var counts = card(
+      '<h3>At a glance</h3>' +
+      '<div class="count-row">' +
+        '<div class="count-box' + (overdue ? " bad" : "") + '"><div class="count-n">' + overdue + '</div><div class="count-l">Overdue back</div></div>' +
+        '<div class="count-box' + (out ? " warn" : "") + '"><div class="count-n">' + out + '</div><div class="count-l">Currently out</div></div>' +
+        '<div class="count-box"><div class="count-n">' + v.movements.length + '</div><div class="count-l">Logged today</div></div>' +
+      '</div>'
+    );
+
+    var rows = v.movements.map(function (m, i) {
+      var pfx = "vehicles.movements." + i;
+      return (
+        '<tr' + (m.status === "red" && !state.editMode ? ' class="row-overdue"' : "") + '>' +
+          '<td><div class="name">' + textField(pfx + ".vehicle", m.vehicle) + '</div>' +
+            '<div class="note">' + textField(pfx + ".note", m.note) + '</div></td>' +
+          '<td>' + textField(pfx + ".driver", m.driver) + '</td>' +
+          '<td>' + textField(pfx + ".purpose", m.purpose) + '</td>' +
+          '<td>' + textField(pfx + ".out", m.out) + '</td>' +
+          '<td>' + textField(pfx + ".eta", m.eta) + '</td>' +
+          '<td>' + statusField(pfx + ".status", m.status) + '</td>' +
+          delTd("vehicles.movements", i) +
+        '</tr>'
+      );
+    }).join("");
+
+    var table = card(
+      '<h3>Movement Log</h3>' +
+      '<p class="note">Red = overdue against expected return · Amber = out on task · Green = returned.</p>' +
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>' +
+        '<th>Vehicle</th><th>Driver</th><th>Task</th><th>Out</th><th>Expected</th><th>State</th>' + delTh() +
+      '</tr></thead><tbody>' + (rows || '<tr><td colspan="6" class="note">No movements logged.</td></tr>') + '</tbody></table></div>' +
+      addBtn("vehicles.movements", "movement"),
+      "card-wide"
+    );
+
+    return '<div class="grid">' + head + counts + '</div><div class="grid" style="margin-top:16px;">' + table + '</div>';
+  }
+
+  function renderDuty() {
+    var d = state.data.duty;
+
+    var head = card(
+      '<div class="card-header"><h2>Duty Roster</h2>' + statusField("duty.overall", d.overall) + '</div>' +
+      '<p class="note">' + textField("duty.summary", d.summary) + '</p>'
+    );
+
+    var ordered = d.roster.map(function (r, i) { return { row: r, index: i }; });
+    if (!state.editMode) {
+      ordered.sort(function (x, y) { return String(x.row.date).localeCompare(String(y.row.date)); });
+    }
+
+    var rows = ordered.map(function (e) {
+      var r = e.row;
+      var pfx = "duty.roster." + e.index;
+      var d2 = daysUntil(r.date);
+      var when = state.editMode
+        ? textField(pfx + ".date", r.date, "date")
+        : (d2 === 0 ? '<span class="due-chip soon">Today</span>'
+          : d2 === 1 ? '<span class="due-chip soon">Tomorrow</span>'
+          : '<span class="due-chip">' + escapeHtml(r.date || "—") + '</span>');
+      return (
+        '<tr' + (d2 === 0 && !state.editMode ? ' class="row-today"' : "") + '>' +
+          '<td>' + when + '</td>' +
+          '<td>' + textField(pfx + ".duty", r.duty) + '</td>' +
+          '<td>' + textField(pfx + ".name", r.name) + '</td>' +
+          '<td>' + textField(pfx + ".contact", r.contact) + '</td>' +
+          '<td>' + statusField(pfx + ".status", r.status) + '</td>' +
+          delTd("duty.roster", e.index) +
+        '</tr>'
+      );
+    }).join("");
+
+    var rosterCard = card(
+      '<h3>Detailed Duties</h3>' +
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>' +
+        '<th>Date</th><th>Duty</th><th>Detailed</th><th>Contact</th><th>Status</th>' + delTh() +
+      '</tr></thead><tbody>' + (rows || '<tr><td colspan="5" class="note">No duties detailed.</td></tr>') + '</tbody></table></div>' +
+      addBtn("duty.roster", "duty"),
+      "card-wide"
+    );
+
+    var standRows = d.standing.map(function (s, i) {
+      var pfx = "duty.standing." + i;
+      return '<div class="item-row"><div><div class="name">' + textField(pfx + ".duty", s.duty) + '</div>' +
+        '<div class="note">' + textField(pfx + ".holder", s.holder) + '</div>' +
+        '<div class="note">' + textField(pfx + ".note", s.note) + '</div></div>' +
+        '<div class="row-controls">' + statusField(pfx + ".status", s.status) + delBtn("duty.standing", i) + '</div></div>';
+    }).join("");
+    var standCard = card('<h3>Standing Appointments</h3>' + standRows + addBtn("duty.standing", "appointment"));
+
+    return '<div class="grid">' + head + standCard + '</div><div class="grid" style="margin-top:16px;">' + rosterCard + '</div>';
+  }
+
+  function renderResources() {
+    var r = state.data.resources;
+    var critical = r.stocks.filter(function (s) { return s.status === "red"; }).length;
+
+    var head = card(
+      '<div class="card-header"><h2>Critical Resources</h2>' + statusField("resources.overall", r.overall) + '</div>' +
+      '<p class="note">' + textField("resources.summary", r.summary) + '</p>' +
+      (critical ? '<p class="note" style="color:var(--red);">' + critical + ' item(s) at critical level.</p>' : "")
+    );
+
+    var rows = r.stocks.map(function (s, i) {
+      var pfx = "resources.stocks." + i;
+      var held = Number(s.held) || 0;
+      var auth = Number(s.authorised) || 0;
+      var p = pct(held, auth);
+      return (
+        '<tr' + (s.status === "red" && !state.editMode ? ' class="row-overdue"' : "") + '>' +
+          '<td>' + textField(pfx + ".item", s.item) + '</td>' +
+          '<td>' + textField(pfx + ".held", s.held, "number") + ' / ' + textField(pfx + ".authorised", s.authorised, "number") + '</td>' +
+          '<td>' + textField(pfx + ".unit", s.unit) + '</td>' +
+          '<td style="min-width:120px;">' +
+            '<div class="progress-track" style="width:100px;display:inline-block;vertical-align:middle;">' +
+              '<div class="progress-fill ' + s.status + '" style="width:' + p + '%"></div>' +
+            '</div> <span class="note">' + p + '%</span>' +
+          '</td>' +
+          '<td>' + textField(pfx + ".days", s.days, "number") + '</td>' +
+          '<td>' + statusField(pfx + ".status", s.status) + '</td>' +
+          delTd("resources.stocks", i) +
+        '</tr>'
+      );
+    }).join("");
+
+    var table = card(
+      '<h3>Holdings &amp; Days of Supply</h3>' +
+      '<p class="note">"Days" is the estimated days of supply at current consumption.</p>' +
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>' +
+        '<th>Item</th><th>Held / Authorised</th><th>Unit</th><th>Level</th><th>Days</th><th>Status</th>' + delTh() +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      addBtn("resources.stocks", "resource"),
+      "card-wide"
+    );
+
+    return '<div class="grid">' + head + '</div><div class="grid" style="margin-top:16px;">' + table + '</div>';
+  }
+
+  function renderCommitments() {
+    var c = state.data.commitments;
+
+    var head = card(
+      '<div class="card-header"><h2>Important Commitments</h2>' + statusField("commitments.overall", c.overall) + '</div>' +
+      '<p class="note">' + textField("commitments.summary", c.summary) + '</p>'
+    );
+
+    var ordered = c.items.map(function (it, i) { return { item: it, index: i }; });
+    if (!state.editMode) {
+      ordered.sort(function (x, y) {
+        var dx = daysUntil(x.item.date), dy = daysUntil(y.item.date);
+        if (dx === null && dy === null) return 0;
+        if (dx === null) return 1;
+        if (dy === null) return -1;
+        return dx - dy;
+      });
+    }
+
+    var rows = ordered.map(function (e) {
+      var it = e.item;
+      var pfx = "commitments.items." + e.index;
+      var d = daysUntil(it.date);
+      var when = state.editMode
+        ? textField(pfx + ".date", it.date, "date")
+        : (d === null ? '<span class="due-chip none">No date</span>'
+          : d < 0 ? '<span class="due-chip">' + escapeHtml(it.date) + '</span>'
+          : d === 0 ? '<span class="due-chip overdue">Today</span>'
+          : d <= 14 ? '<span class="due-chip soon">In ' + d + ' days</span>'
+          : '<span class="due-chip">' + escapeHtml(it.date) + '</span>');
+      return (
+        '<tr>' +
+          '<td><div class="name">' + textField(pfx + ".event", it.event) + '</div>' +
+            '<div class="note">' + textField(pfx + ".note", it.note) + '</div></td>' +
+          '<td>' + when + '</td>' +
+          '<td>' + textField(pfx + ".lead", it.lead) + '</td>' +
+          '<td>' + textField(pfx + ".location", it.location) + '</td>' +
+          '<td>' + statusField(pfx + ".status", it.status) + '</td>' +
+          delTd("commitments.items", e.index) +
+        '</tr>'
+      );
+    }).join("");
+
+    var table = card(
+      '<h3>Forthcoming</h3>' +
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>' +
+        '<th>Commitment</th><th>When</th><th>Lead</th><th>Location</th><th>Status</th>' + delTh() +
+      '</tr></thead><tbody>' + (rows || '<tr><td colspan="5" class="note">Nothing scheduled.</td></tr>') + '</tbody></table></div>' +
+      addBtn("commitments.items", "commitment"),
+      "card-wide"
+    );
+
+    return '<div class="grid">' + head + '</div><div class="grid" style="margin-top:16px;">' + table + '</div>';
+  }
+
+  function renderSituational() {
+    var s = state.data.situational;
+
+    var warning =
+      '<div class="card notice-card">' +
+        '<h3>&#9888; Open-source information only</h3>' +
+        '<p class="note">This board is for general awareness from <strong>publicly available reporting</strong> — ' +
+        'news agencies, official statements and public advisories. Summarise what has been openly published and cite the outlet.</p>' +
+        '<p class="note"><strong>Do not enter</strong> classified material, intelligence reports, source-derived information, ' +
+        'operational plans, or anything carrying a security marking. This dashboard has no meaningful access control and may be ' +
+        'reachable from the public internet — assume anything written here can be read by anyone.</p>' +
+      '</div>';
+
+    var head = card(
+      '<div class="card-header"><h2>Situational Awareness</h2>' + statusField("situational.overall", s.overall) + '</div>' +
+      '<p class="note">' + textField("situational.summary", s.summary) + '</p>'
+    );
+
+    var ordered = s.updates.map(function (u, i) { return { u: u, index: i }; });
+    if (!state.editMode) {
+      ordered.sort(function (x, y) { return String(y.u.date).localeCompare(String(x.u.date)); });
+    }
+
+    var rows = ordered.map(function (e) {
+      var u = e.u;
+      var pfx = "situational.updates." + e.index;
+      return (
+        '<tr>' +
+          '<td>' + (state.editMode ? textField(pfx + ".date", u.date, "date") : '<span class="due-chip">' + escapeHtml(u.date || "—") + '</span>') + '</td>' +
+          '<td><div class="name">' + textField(pfx + ".headline", u.headline) + '</div>' +
+            '<div class="note">' + textField(pfx + ".note", u.note) + '</div></td>' +
+          '<td>' + textField(pfx + ".area", u.area) + '</td>' +
+          '<td>' + textField(pfx + ".source", u.source) + '</td>' +
+          '<td>' + statusField(pfx + ".status", u.status) + '</td>' +
+          delTd("situational.updates", e.index) +
+        '</tr>'
+      );
+    }).join("");
+
+    var table = card(
+      '<h3>Recent Entries</h3>' +
+      '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>' +
+        '<th>Date</th><th>Summary</th><th>Area</th><th>Source</th><th>Status</th>' + delTh() +
+      '</tr></thead><tbody>' + (rows || '<tr><td colspan="5" class="note">No entries.</td></tr>') + '</tbody></table></div>' +
+      addBtn("situational.updates", "entry"),
+      "card-wide"
+    );
+
+    return warning + '<div class="grid" style="margin-top:16px;">' + head + '</div>' +
+           '<div class="grid" style="margin-top:16px;">' + table + '</div>';
+  }
+
   var RENDERERS = {
     overview: renderOverview,
     readiness: renderReadiness,
@@ -692,14 +1080,24 @@
     admin: renderAdmin,
     maintenance: renderMaintenance,
     welfare: renderWelfare,
-    actions: renderActions
+    actions: renderActions,
+    parade: renderParade,
+    vehicles: renderVehicles,
+    duty: renderDuty,
+    resources: renderResources,
+    commitments: renderCommitments,
+    situational: renderSituational
   };
 
   // ---------------- shell ----------------
   function buildSidebar() {
     var nav = document.getElementById("nav");
     nav.innerHTML = SECTIONS.map(function (s) {
-      var dot = s.id === "overview" ? "" : '<span class="dot ' + state.data[s.id].overall + '"></span>';
+      if (s.group) return '<div class="nav-group">' + escapeHtml(s.group) + '</div>';
+      var sec = state.data[s.id];
+      var dot = (s.id === "overview" || !sec || !sec.overall)
+        ? ""
+        : '<span class="dot ' + sec.overall + '"></span>';
       return (
         '<button class="nav-btn' + (state.route === s.id ? " active" : "") + '" data-nav="' + s.id + '">' +
           '<span class="icon">' + s.icon + '</span><span>' + s.label + '</span>' + dot +
@@ -709,7 +1107,7 @@
   }
 
   function sectionTitle(id) {
-    var found = SECTIONS.filter(function (s) { return s.id === id; })[0];
+    var found = sectionList().filter(function (s) { return s.id === id; })[0];
     return found ? found.label : "";
   }
 

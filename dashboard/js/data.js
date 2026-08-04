@@ -211,5 +211,128 @@ window.DEFAULT_DATA = {
         note: "60% complete, on programme"
       }
     ]
+  },
+
+  // 7. DAILY PARADE STATE
+  // "Present" plus every accounted-for column should add up to "Posted".
+  // The dashboard checks this for you and flags any row that doesn't
+  // balance, so a miscount is caught before it reaches the CO.
+  parade: {
+    overall: "green",
+    summary: "Two Other Ranks unaccounted against posted strength — both listed as absentees and under check.",
+    paradeDate: "2026-08-04",
+    strength: [
+      { category: "Officers", posted: 22, present: 18, leave: 2, sick: 0, course: 1, duty: 1 },
+      { category: "JCOs", posted: 48, present: 39, leave: 5, sick: 1, course: 2, duty: 1 },
+      { category: "Other Ranks", posted: 580, present: 484, leave: 58, sick: 9, course: 14, duty: 13 }
+    ],
+    absentees: [
+      { name: "Sample — Sldr A", reason: "Absent without leave", since: "2026-08-02", status: "red", note: "Reported to Adjutant" },
+      { name: "Sample — Sldr B", reason: "Overstayed leave", since: "2026-08-03", status: "amber", note: "Contact established, returning" }
+    ]
+  },
+
+  // 8. VEHICLE MOVEMENT (IN / OUT)
+  // status: "amber" = currently out, "green" = returned, "red" = overdue back.
+  vehicles: {
+    overall: "amber",
+    summary: "Four vehicles out; one overdue against expected return.",
+    movements: [
+      { vehicle: "Sample — BA 1234", driver: "Sample — Dvr A", purpose: "Ration collection", out: "0715", eta: "1200", status: "red", note: "Overdue — no contact" },
+      { vehicle: "Sample — BA 2345", driver: "Sample — Dvr B", purpose: "Bde HQ liaison", out: "0800", eta: "1600", status: "amber", note: "Out on task" },
+      { vehicle: "Sample — BA 3456", driver: "Sample — Dvr C", purpose: "Sick evacuation to CMH", out: "0930", eta: "1400", status: "amber", note: "Out on task" },
+      { vehicle: "Sample — BA 4567", driver: "Sample — Dvr D", purpose: "Water bowser run", out: "0600", eta: "0900", status: "green", note: "Returned 0850" }
+    ]
+  },
+
+  // 9. DUTY ROSTER
+  duty: {
+    overall: "green",
+    summary: "Duties detailed to end of week. Two standing appointments need reliefs nominated.",
+    roster: [
+      { date: "2026-08-04", duty: "Orderly Officer", name: "Sample — Lt A", contact: "Ext 201", status: "green" },
+      { date: "2026-08-04", duty: "Guard Commander", name: "Sample — Hav B", contact: "Ext 202", status: "green" },
+      { date: "2026-08-05", duty: "Orderly Officer", name: "Sample — Lt C", contact: "Ext 201", status: "green" },
+      { date: "2026-08-05", duty: "Guard Commander", name: "Sample — Hav D", contact: "Ext 202", status: "amber" },
+      { date: "2026-08-06", duty: "Orderly Officer", name: "To be detailed", contact: "—", status: "red" }
+    ],
+    standing: [
+      { duty: "Ammunition Storeman", holder: "Sample — Nk E", status: "green", note: "Qualified, in date" },
+      { duty: "Unit Fire Picket NCO", holder: "Sample — Hav F", status: "amber", note: "Relief to be nominated" },
+      { duty: "Range Safety Officer", holder: "Vacant", status: "red", note: "Nomination pending" }
+    ]
+  },
+
+  // 10. CRITICAL RESOURCES (SUSTAINMENT)
+  // "days" = estimated days of supply at current consumption. This is the
+  // sustainment view; Operational Readiness holds the ammunition scale view.
+  resources: {
+    overall: "amber",
+    summary: "Fuel holding below one week. Smoke ammunition remains the critical shortfall.",
+    stocks: [
+      { item: "Diesel (POL)", held: 4200, authorised: 9000, unit: "litres", days: 5, status: "amber" },
+      { item: "Petrol (POL)", held: 1100, authorised: 1500, unit: "litres", days: 12, status: "green" },
+      { item: "HE Bombs 81mm", held: 2400, authorised: 2400, unit: "rounds", days: 30, status: "green" },
+      { item: "HE Bombs 120mm", held: 860, authorised: 1200, unit: "rounds", days: 14, status: "amber" },
+      { item: "Smoke Rounds", held: 190, authorised: 500, unit: "rounds", days: 4, status: "red" },
+      { item: "Dry Rations", held: 18, authorised: 21, unit: "days", days: 18, status: "green" },
+      { item: "Water (stored)", held: 46000, authorised: 60000, unit: "litres", days: 6, status: "amber" }
+    ]
+  },
+
+  // 11. IMPORTANT COMMITMENTS
+  // Dates as YYYY-MM-DD. "Days to go" is worked out automatically.
+  commitments: {
+    overall: "amber",
+    summary: "Bde inspection inside three weeks; range allotment still outstanding.",
+    items: [
+      { event: "Sample — Bde Commander's Inspection", date: "2026-08-22", lead: "Sample — Adjutant", location: "Unit Lines", status: "amber", note: "Preparation programme issued" },
+      { event: "Sample — Combined Arms Exercise", date: "2026-09-10", lead: "Sample — 2IC", location: "Field Firing Range", status: "red", note: "Range allotment not yet received" },
+      { event: "Sample — Unit Sports Meet", date: "2026-09-25", lead: "Sample — Adjutant", location: "Unit Ground", status: "green", note: "On programme" },
+      { event: "Sample — Annual Administrative Inspection", date: "2026-10-14", lead: "Sample — Subedar Major", location: "Unit Lines", status: "green", note: "Documentation being compiled" }
+    ]
+  },
+
+  // 12. BORDER / REGIONAL SITUATIONAL AWARENESS
+  // -----------------------------------------------------------------------
+  // OPEN-SOURCE SUMMARIES ONLY. This board is for keeping the unit generally
+  // informed from publicly available reporting (news agencies, official
+  // statements, public advisories).
+  //
+  // Do NOT enter classified material, intelligence reports, source-derived
+  // information, operational plans, or anything with a security marking.
+  // This dashboard has no access control worth the name and may be hosted
+  // on the public internet — treat everything written here as if it could
+  // be read by anyone.
+  // -----------------------------------------------------------------------
+  situational: {
+    overall: "amber",
+    summary: "Sample entries only. Open-source summaries for general awareness — no classified content.",
+    updates: [
+      {
+        date: "2026-08-03",
+        headline: "Sample — Regional news roundup reviewed",
+        area: "General",
+        source: "Open press",
+        status: "green",
+        note: "Sample placeholder. Replace with an open-source summary and cite the outlet."
+      },
+      {
+        date: "2026-08-01",
+        headline: "Sample — Public weather and river-level advisory noted",
+        area: "Monsoon / terrain",
+        source: "Public advisory",
+        status: "amber",
+        note: "Sample placeholder. Affects movement planning; cite the issuing authority."
+      },
+      {
+        date: "2026-07-28",
+        headline: "Sample — Official statement on border trade reported in press",
+        area: "Cross-border",
+        source: "Open press",
+        status: "green",
+        note: "Sample placeholder. Summarise only what has been publicly reported."
+      }
+    ]
   }
 };
