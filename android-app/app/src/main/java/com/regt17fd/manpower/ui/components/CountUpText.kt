@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.TextStyle
 
 /** Dashboard numbers animate from 0 up to their value on first composition. */
