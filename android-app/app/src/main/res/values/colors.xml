@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- "Artillery Dark" palette — exact hex values from the design spec.
+         Compose reads these via ui/theme/Color.kt; this copy is only for
+         the pre-Compose launch theme (status bar / splash background)
+         defined in themes.xml, which the system needs before Compose
+         has a chance to draw a single frame. -->
+    <color name="background_primary">#0f0f1a</color>
+    <color name="card_background">#1e1e2e</color>
+    <color name="accent_red">#c41e3a</color>
+    <color name="accent_gold">#d4af37</color>
+    <color name="text_primary">#e0e0e0</color>
+    <color name="text_secondary">#a0a0a0</color>
+    <color name="success_green">#4caf50</color>
+    <color name="warning_orange">#ff9800</color>
+    <color name="danger_red">#f44336</color>
+    <color name="ic_launcher_background">#0f0f1a</color>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Minimal pre-Compose theme: only used for the window background
+         while the process cold-starts, before setContent{} takes over
+         with the real Material3 "Artillery Dark" theme (ui/theme/Theme.kt). -->
+    <style name="Theme.ManpowerApp" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/background_primary</item>
+        <item name="android:statusBarColor">@color/background_primary</item>
+        <item name="android:navigationBarColor">@color/background_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
