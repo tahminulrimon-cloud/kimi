@@ -1,0 +1,1815 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<title>Claude Plugin ব্যবহারের সম্পূর্ণ বাংলা টিউটোরিয়াল</title>
+<style>
+/* @@FONTS@@ */
+
+:root{
+  --ink:#16181d;
+  --ink-soft:#40454f;
+  --muted:#6b7280;
+  --rule:#d9dde5;
+  --rule-soft:#e9ecf1;
+  --accent:#4338ca;
+  --accent-soft:#eef0fd;
+  --code-bg:#f5f6f9;
+  --note:#2563eb;      --note-bg:#eff5ff;
+  --warn:#b45309;      --warn-bg:#fff8ec;
+  --tip:#047857;       --tip-bg:#edfaf4;
+  --sans:'Noto Sans Bengali','Noto Sans',sans-serif;
+  --serif:'Noto Serif Bengali',serif;
+  --mono:'Noto Sans Mono','Noto Sans Bengali','DejaVu Sans Mono',monospace;
+}
+
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+body{
+  margin:0;
+  font-family:var(--sans);
+  font-size:10.5pt;
+  line-height:1.95;
+  color:var(--ink);
+  text-align:justify;
+  hyphens:none;
+}
+
+/* ---------- page setup ---------- */
+@page{
+  size:A4;
+  margin:19mm 17mm 20mm 17mm;
+}
+@media screen{
+  body{background:#eceef2}
+  .sheet{
+    background:#fff; max-width:210mm; margin:0 auto; padding:19mm 17mm;
+    box-shadow:0 1px 3px rgba(0,0,0,.12);
+  }
+}
+@media print{
+  .sheet{padding:0}
+  .screen-only{display:none}
+}
+
+/* ---------- headings ---------- */
+h1,h2,h3,h4{font-family:var(--serif); line-height:1.5; text-align:right; color:var(--ink)}
+h1{
+  break-before:page; page-break-before:always;
+  font-size:20pt; font-weight:700; margin:0 0 14pt; padding-bottom:9pt;
+  border-bottom:2.5pt solid var(--accent); text-align:left;
+}
+h1 .chno{
+  display:block; font-family:var(--sans); font-size:9pt; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+  margin-bottom:4pt;
+}
+h2{
+  font-size:14pt; font-weight:700; margin:20pt 0 8pt; text-align:left;
+  color:#1f2330;
+}
+h3{font-size:11.5pt; font-weight:600; margin:14pt 0 5pt; text-align:left; color:#2b3040}
+h4{font-size:10.5pt; font-weight:600; margin:11pt 0 4pt; text-align:left; color:var(--ink-soft)}
+h1+h2,h2+h3,h3+h4{margin-top:8pt}
+h2,h3,h4{break-after:avoid; page-break-after:avoid}
+
+p{margin:0 0 8pt; orphans:3; widows:3}
+.lead{font-size:11pt; color:var(--ink-soft); margin-bottom:12pt}
+
+/* ---------- inline code ---------- */
+code{
+  font-family:var(--mono); font-size:.87em; direction:ltr; unicode-bidi:embed;
+  background:var(--code-bg); border:.5pt solid var(--rule-soft);
+  border-radius:2.5pt; padding:.5pt 3pt; white-space:nowrap;
+}
+h1 code,h2 code,h3 code,h4 code{font-size:.85em; background:none; border:none; padding:0}
+td code,th code{white-space:normal; word-break:break-word}
+
+/* ---------- code blocks ---------- */
+pre{
+  font-family:var(--mono); font-size:8.6pt; line-height:1.62;
+  background:var(--code-bg); border:.5pt solid var(--rule-soft);
+  border-left:2.5pt solid var(--accent);
+  border-radius:0 3pt 3pt 0;
+  padding:7pt 9pt; margin:8pt 0 10pt;
+  white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere;
+  direction:ltr; text-align:left;
+  break-inside:avoid; page-break-inside:avoid;
+}
+pre code{background:none; border:none; padding:0; font-size:1em; white-space:inherit}
+pre .cm{color:#6b7280; font-size:1.04em}
+.filename{
+  font-family:var(--mono); font-size:8pt; color:var(--muted);
+  margin:8pt 0 -6pt; direction:ltr; text-align:left;
+}
+
+/* ---------- tables ---------- */
+table{
+  width:100%; border-collapse:collapse; margin:9pt 0 12pt;
+  font-size:9.2pt; line-height:1.62; table-layout:fixed;
+  break-inside:avoid; page-break-inside:avoid;
+}
+table.long{break-inside:auto; page-break-inside:auto}
+table.long tr{break-inside:avoid; page-break-inside:avoid}
+thead{display:table-header-group}
+th{
+  background:var(--accent-soft); color:#312a9c; font-weight:700;
+  text-align:left; padding:5pt 7pt; border:.5pt solid var(--rule);
+  font-family:var(--sans);
+}
+td{padding:5pt 7pt; border:.5pt solid var(--rule); vertical-align:top; text-align:left; word-wrap:break-word}
+tbody tr:nth-child(even){background:#fafbfd}
+
+/* ---------- lists ---------- */
+ul,ol{margin:0 0 9pt; padding-right:0; padding-left:18pt}
+li{margin-bottom:4pt; text-align:justify}
+li>ul,li>ol{margin-top:4pt}
+ol.steps{list-style:none; counter-reset:st; padding-left:0}
+ol.steps>li{
+  counter-increment:st; position:relative; padding-left:23pt; margin-bottom:10pt;
+  break-inside:avoid; page-break-inside:avoid;
+}
+ol.steps>li::before{
+  content:counter(st); position:absolute; left:0; top:2.5pt;
+  width:15pt; height:15pt; border-radius:50%;
+  background:var(--accent); color:#fff;
+  font-family:var(--mono); font-size:8pt; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+}
+ol.steps>li>pre,ol.steps>li>p{break-inside:avoid}
+
+/* ---------- callouts ---------- */
+.box{
+  border-left:2.5pt solid var(--note); background:var(--note-bg);
+  padding:7pt 10pt; margin:9pt 0 11pt; border-radius:0 3pt 3pt 0;
+  font-size:9.6pt; break-inside:avoid; page-break-inside:avoid;
+}
+.box p:last-child{margin-bottom:0}
+.box .lbl{
+  display:block; font-weight:700; font-size:8.5pt; letter-spacing:.06em;
+  color:var(--note); margin-bottom:3pt;
+}
+.box.warn{border-color:var(--warn); background:var(--warn-bg)}
+.box.warn .lbl{color:var(--warn)}
+.box.tip{border-color:var(--tip); background:var(--tip-bg)}
+.box.tip .lbl{color:var(--tip)}
+
+/* ---------- cover ---------- */
+.cover{
+  height:255mm; display:flex; flex-direction:column; justify-content:center;
+  text-align:center; break-after:page; page-break-after:always;
+}
+.cover .kicker{
+  font-family:var(--mono); font-size:9pt; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--accent); margin-bottom:14pt;
+}
+.cover h1{
+  border:none; break-before:avoid; page-break-before:avoid;
+  font-size:31pt; line-height:1.42; margin:0 0 8pt; padding:0; text-align:center;
+}
+.cover .sub{font-size:13pt; color:var(--ink-soft); margin:0 0 22pt; text-align:center}
+.cover .rule{width:52pt; height:2.5pt; background:var(--accent); margin:0 auto 22pt}
+.cover .blurb{
+  font-size:10.5pt; color:var(--ink-soft); max-width:118mm; margin:0 auto 26pt;
+  text-align:center; line-height:1.9;
+}
+.cover .meta{
+  font-family:var(--mono); font-size:8.5pt; color:var(--muted); line-height:2;
+  direction:ltr;
+}
+.cover .pill{
+  display:inline-block; border:.75pt solid var(--rule); border-radius:20pt;
+  padding:3pt 12pt; margin:0 3pt; font-size:8.5pt; color:var(--ink-soft);
+  font-family:var(--sans);
+}
+
+/* ---------- table of contents ---------- */
+.toc{margin-bottom:0}
+.toc h1{break-before:avoid; page-break-before:avoid}
+.toc ol{list-style:none; padding:0; margin:0; font-size:10pt}
+.toc li{margin:0; padding:0}
+.toc a{
+  display:flex; align-items:baseline; gap:5pt;
+  color:var(--ink); text-decoration:none; padding:3.5pt 0;
+  border-bottom:.5pt dotted var(--rule);
+}
+.toc .t{flex:0 1 auto}
+.toc .dots{flex:1 1 auto; border-bottom:.5pt dotted var(--rule); min-width:12pt; transform:translateY(-2.5pt)}
+.toc .pg{flex:0 0 auto; font-family:var(--mono); font-size:9pt; color:var(--muted)}
+.toc .lvl1{font-weight:700}
+.toc .lvl1 a{border-bottom:none; padding-top:9pt}
+.toc .lvl2 a{padding-left:14pt; font-size:9.4pt; color:var(--ink-soft)}
+.toc .lvl2 .pg{font-size:8.5pt}
+
+/* ---------- misc ---------- */
+.kv{font-size:9.6pt}
+.kv dt{font-weight:700; margin-top:6pt; font-family:var(--mono); font-size:9pt; direction:ltr}
+.kv dd{margin:1pt 0 0 0; padding-left:14pt; color:var(--ink-soft)}
+.small{font-size:9pt; color:var(--muted)}
+.center{text-align:center}
+hr{border:none; border-top:.5pt solid var(--rule); margin:14pt 0}
+strong{font-weight:700}
+.en{direction:ltr; unicode-bidi:embed}
+.nowrap{white-space:nowrap}
+.colophon{
+  margin-top:16pt; padding-top:10pt; border-top:.5pt solid var(--rule);
+  font-size:9pt; color:var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<!-- ==================== COVER ==================== -->
+<section class="cover">
+  <div class="kicker">Claude Code &middot; Plugin Guide</div>
+  <h1>Claude-এ Plugin ব্যবহারের<br>সম্পূর্ণ বাংলা টিউটোরিয়াল</h1>
+  <p class="sub">ইনস্টলেশন, ব্যবস্থাপনা এবং নিজের Plugin তৈরির হাতেকলমে নির্দেশিকা</p>
+  <div class="rule"></div>
+  <p class="blurb">
+    Plugin হলো Claude Code-এর ক্ষমতা বাড়ানোর সবচেয়ে সহজ উপায় — একটি প্যাকেজেই থাকে
+    skill, agent, hook, MCP server আর LSP server। এই বইটিতে ধাপে ধাপে দেখানো হয়েছে
+    কীভাবে marketplace যোগ করবেন, প্রয়োজনীয় plugin ইনস্টল করবেন, দল বেঁধে ব্যবহার করবেন
+    এবং শেষ পর্যন্ত নিজের plugin বানিয়ে অন্যদের সঙ্গে ভাগ করে নেবেন।
+  </p>
+  <p>
+    <span class="pill">CLI</span>
+    <span class="pill">Desktop App</span>
+    <span class="pill">Web / Cloud</span>
+  </p>
+  <p class="meta" style="margin-top:26pt">
+    সংস্করণ ১.০ &nbsp;·&nbsp; সেপ্টেম্বর ২০২৬<br>
+    তথ্যসূত্র: code.claude.com/docs
+  </p>
+</section>
+
+<!-- ==================== TOC ==================== -->
+<nav class="toc" id="toc">
+  <h1>সূচিপত্র</h1>
+  <ol id="toc-list"></ol>
+  <p class="small" style="margin-top:14pt">
+    এই বইয়ের সব command ও ফাইলের নাম ইংরেজিতে রাখা হয়েছে, যাতে আপনি সেগুলো হুবহু
+    কপি করে টার্মিনালে ব্যবহার করতে পারেন। ব্যাখ্যা ও নির্দেশনা বাংলায়।
+  </p>
+</nav>
+
+<!-- ==================== অধ্যায় ১ ==================== -->
+<h1><span class="chno">অধ্যায় ১</span>Plugin কী এবং কেন দরকার</h1>
+
+<p class="lead">
+  Claude Code দিয়ে কাজ করতে করতে প্রায় সবাই একটা জায়গায় পৌঁছান — কিছু কাজ বারবার
+  একইভাবে করতে হয়। প্রতিবার একই নির্দেশনা টাইপ করা, একই review checklist মনে রাখা,
+  একই external service-এর সঙ্গে যুক্ত হওয়া। Plugin ঠিক এই সমস্যাটির সমাধান।
+</p>
+
+<h2>১.১ সংজ্ঞা</h2>
+
+<p>
+  <strong>Plugin</strong> হলো একটি স্বয়ংসম্পূর্ণ (self-contained) প্যাকেজ, যা Claude Code-এর
+  সঙ্গে নতুন সক্ষমতা যুক্ত করে। একটি plugin-এর ভেতরে একসঙ্গে থাকতে পারে:
+</p>
+
+<ul>
+  <li><strong>Skill</strong> — নির্দিষ্ট কাজের জন্য লেখা নির্দেশনা, যা Claude প্রয়োজন বুঝে নিজেই ব্যবহার করে</li>
+  <li><strong>Agent</strong> — আলাদা ব্যক্তিত্ব ও সীমাবদ্ধতাসহ বিশেষায়িত subagent</li>
+  <li><strong>Hook</strong> — নির্দিষ্ট ঘটনার সময় স্বয়ংক্রিয়ভাবে চলা script</li>
+  <li><strong>MCP server</strong> — GitHub, Slack, Figma-র মতো বাইরের service-এর সঙ্গে সংযোগ</li>
+  <li><strong>LSP server</strong> — কোড বোঝার জন্য language server, যা type error সঙ্গে সঙ্গে ধরিয়ে দেয়</li>
+</ul>
+
+<p>
+  গুরুত্বপূর্ণ কথা হলো, এই সবকিছু একটি মাত্র ফোল্ডারে থাকে এবং একটি মাত্র command দিয়ে
+  ইনস্টল করা যায়। ফলে আপনি যা তৈরি করলেন, তা সহজেই সহকর্মীদের সঙ্গে ভাগ করে নেওয়া যায় —
+  তাদের আর হাতে ধরে কনফিগার করতে হয় না।
+</p>
+
+<h2>১.২ Plugin না standalone কনফিগারেশন?</h2>
+
+<p>
+  Claude Code-এ custom skill, agent বা hook যোগ করার দুটি পথ আছে। প্রকল্পের
+  <code>.claude/</code> ফোল্ডারে সরাসরি ফাইল রাখা যায়, আবার সেগুলোকে plugin আকারেও
+  গোছানো যায়। কোনটি কখন বেছে নেবেন:
+</p>
+
+<table>
+  <colgroup><col style="width:24%"><col style="width:22%"><col style="width:54%"></colgroup>
+  <thead>
+    <tr><th>পদ্ধতি</th><th>Skill-এর নাম</th><th>কখন উপযুক্ত</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Standalone</strong><br><code>.claude/</code> ডিরেক্টরি</td>
+      <td><code>/hello</code></td>
+      <td>ব্যক্তিগত workflow, একটিমাত্র প্রকল্পের নিজস্ব প্রয়োজন, দ্রুত পরীক্ষা-নিরীক্ষা</td>
+    </tr>
+    <tr>
+      <td><strong>Plugin</strong><br>নিজস্ব ফোল্ডার ও manifest</td>
+      <td><code>/plugin-name:hello</code></td>
+      <td>সহকর্মীদের সঙ্গে ভাগাভাগি, কমিউনিটিতে বিতরণ, version অনুযায়ী রিলিজ, একাধিক প্রকল্পে পুনর্ব্যবহার</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="box tip">
+  <span class="lbl">টিপস</span>
+  <p>
+    শুরু করুন <code>.claude/</code> দিয়ে — সেখানে দ্রুত পরিবর্তন করে পরীক্ষা করা সহজ।
+    কাজটি স্থির হয়ে গেলে এবং ভাগ করে নেওয়ার প্রয়োজন হলে তখন plugin-এ রূপান্তর করুন।
+    রূপান্তরের পদ্ধতি অধ্যায় ৭-এ বিস্তারিত দেওয়া আছে।
+  </p>
+</div>
+
+<h2>১.৩ Plugin ব্যবহারের সুবিধা</h2>
+
+<ul>
+  <li><strong>একবার সেটআপ, সবখানে ব্যবহার</strong> — user scope-এ ইনস্টল করলে আপনার সব প্রকল্পে চালু থাকে।</li>
+  <li><strong>দলগত সামঞ্জস্য</strong> — project scope-এ ইনস্টল করলে repository-র সব সহযোগী একই টুল পান।</li>
+  <li><strong>Namespace সুরক্ষা</strong> — plugin-এর skill সবসময় <code>/plugin-name:skill-name</code> আকারে আসে, তাই দুটি plugin-এ একই নামের skill থাকলেও সংঘর্ষ হয় না।</li>
+  <li><strong>Version নিয়ন্ত্রণ</strong> — <code>plugin.json</code>-এ <code>version</code> বাড়ালে ব্যবহারকারীরা আপডেট পান; নাহলে পুরোনো সংস্করণেই স্থির থাকেন।</li>
+  <li><strong>এক command-এ ইনস্টল</strong> — MCP server, hook, agent — সব একসঙ্গে কনফিগার হয়ে যায়।</li>
+</ul>
+
+<h2>১.৪ খরচের দিকটিও মনে রাখুন: Context cost</h2>
+
+<p>
+  প্রতিটি চালু plugin তার skill ও tool-এর বিবরণ Claude-এর
+  <strong>context window</strong>-এ যোগ করে। অর্থাৎ প্রতিটি turn-এ কিছু বাড়তি token খরচ হয়।
+  <code>/plugin</code> মেনুর details pane-এ <strong>Context cost</strong> নামে একটি হিসাব দেখানো
+  হয় — ইনস্টলের আগেই বোঝা যায় plugin-টি কত token যোগ করবে।
+</p>
+
+<div class="box">
+  <span class="lbl">নোট</span>
+  <p>
+    দরকারের চেয়ে বেশি plugin চালু রাখলে context ভরে যায় এবং Claude-এর কাজের মান কমতে পারে।
+    যেসব plugin ব্যবহার করছেন না, সেগুলো <code>/plugin disable</code> দিয়ে বন্ধ রাখাই ভালো।
+    Claude Code নিজেও অব্যবহৃত plugin-গুলোকে <strong>Not used recently</strong> শিরোনামে আলাদা
+    করে দেখায় — বিস্তারিত অধ্যায় ৬-এ।
+  </p>
+</div>
+
+<!-- ==================== অধ্যায় ২ ==================== -->
+<h1><span class="chno">অধ্যায় ২</span>Plugin-এর উপাদানসমূহ</h1>
+
+<p class="lead">
+  একটি plugin আসলে কতগুলো নির্দিষ্ট নামের ফোল্ডার ও ফাইলের সমষ্টি। Claude Code plugin-এর
+  root ডিরেক্টরিতে এই নামগুলো খুঁজে নেয় এবং যা পায় তা-ই লোড করে। নিচে প্রতিটি উপাদানের
+  পরিচয় দেওয়া হলো।
+</p>
+
+<h2>২.১ এক নজরে সব উপাদান</h2>
+
+<table class="long">
+  <colgroup><col style="width:22%"><col style="width:78%"></colgroup>
+  <thead>
+    <tr><th>অবস্থান (plugin root-এ)</th><th>কাজ</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>.claude-plugin/plugin.json</code></td><td>Plugin-এর manifest — নাম, version, লেখক ও কনফিগারেশন। উপাদানগুলো ডিফল্ট জায়গায় থাকলে এটি ঐচ্ছিক।</td></tr>
+    <tr><td><code>skills/</code></td><td>প্রতিটি skill একটি ফোল্ডার, ভেতরে <code>SKILL.md</code>। Claude প্রসঙ্গ বুঝে নিজেই এগুলো ব্যবহার করে।</td></tr>
+    <tr><td><code>commands/</code></td><td>সরল markdown ফাইল, প্রতিটি একেকটি skill। নতুন plugin-এ <code>skills/</code> ব্যবহার করাই ভালো।</td></tr>
+    <tr><td><code>agents/</code></td><td>Subagent-এর সংজ্ঞা — নিজস্ব system prompt, model ও tool-সীমা সহ।</td></tr>
+    <tr><td><code>hooks/hooks.json</code></td><td>ঘটনাভিত্তিক handler — যেমন প্রতিবার ফাইল লেখার পরে formatter চালানো।</td></tr>
+    <tr><td><code>.mcp.json</code></td><td>MCP server-এর কনফিগারেশন, যা বাইরের service-এর tool যোগ করে।</td></tr>
+    <tr><td><code>.lsp.json</code></td><td>Language server-এর কনফিগারেশন — code intelligence-এর জন্য।</td></tr>
+    <tr><td><code>monitors/monitors.json</code></td><td>পটভূমিতে চলা monitor, যা log বা বাইরের অবস্থা দেখে Claude-কে জানায় (experimental)।</td></tr>
+    <tr><td><code>output-styles/</code></td><td>Claude কীভাবে উত্তর দেবে তার ধরন বদলানোর সংজ্ঞা।</td></tr>
+    <tr><td><code>themes/</code></td><td>টার্মিনালের রঙের theme (experimental)।</td></tr>
+    <tr><td><code>bin/</code></td><td>Executable ফাইল, যেগুলো plugin চালু থাকা অবস্থায় Bash tool-এর <code>PATH</code>-এ যুক্ত হয়।</td></tr>
+    <tr><td><code>settings.json</code></td><td>Plugin চালু হলে প্রযোজ্য ডিফল্ট setting। বর্তমানে শুধু <code>agent</code> ও <code>subagentStatusLine</code> সমর্থিত।</td></tr>
+  </tbody>
+</table>
+
+<div class="box warn">
+  <span class="lbl">সতর্কতা</span>
+  <p>
+    সবচেয়ে বেশি যে ভুলটি হয়: <code>commands/</code>, <code>agents/</code>, <code>skills/</code> বা
+    <code>hooks/</code> ফোল্ডারকে <code>.claude-plugin/</code>-এর <strong>ভেতরে</strong> রাখা।
+    <code>.claude-plugin/</code>-এর ভেতরে কেবল <code>plugin.json</code> থাকবে; বাকি সব ফোল্ডার
+    plugin root-এ, অর্থাৎ <code>.claude-plugin/</code>-এর পাশে থাকতে হবে।
+  </p>
+</div>
+
+<h2>২.২ Skill</h2>
+
+<p>
+  Skill হলো plugin-এর সবচেয়ে বেশি ব্যবহৃত উপাদান। প্রতিটি skill একটি ফোল্ডার, যার ভেতরে
+  <code>SKILL.md</code> ফাইল থাকে। ফাইলের শুরুতে YAML frontmatter-এ একটি
+  <code>description</code> দিতে হয় — এই বর্ণনা দেখেই Claude বুঝতে পারে কখন skill-টি কাজে লাগবে।
+</p>
+
+<p class="filename">skills/code-review/SKILL.md</p>
+<pre><code>---
+description: Reviews code for best practices and potential issues. Use when
+  reviewing code, checking PRs, or analyzing code quality.
+---
+
+When reviewing code, check for:
+1. Code organization and structure
+2. Error handling
+3. Security concerns
+4. Test coverage</code></pre>
+
+<p>
+  Plugin-এর skill সবসময় namespace সহ ডাকা হয় — <code>/plugin-name:skill-name</code>।
+  Namespace আসে <code>plugin.json</code>-এর <code>name</code> ক্ষেত্র থেকে।
+</p>
+
+<h2>২.৩ Agent (Subagent)</h2>
+
+<p>
+  Agent হলো বিশেষায়িত সহকারী — নির্দিষ্ট কাজের জন্য আলাদা system prompt, আলাদা model,
+  এমনকি আলাদা tool-সীমা নিয়ে চলে। <code>agents/</code> ফোল্ডারে প্রতিটি agent একটি
+  markdown ফাইল:
+</p>
+
+<p class="filename">agents/reviewer.md</p>
+<pre><code>---
+name: code-reviewer
+description: Reviews code for quality and security issues
+model: sonnet
+effort: medium
+maxTurns: 20
+disallowedTools: Write, Edit
+---
+
+You are a senior code reviewer with expertise in Python,
+JavaScript, and TypeScript...</code></pre>
+
+<p>
+  Frontmatter-এ ব্যবহারযোগ্য ক্ষেত্রগুলো: <code>name</code>, <code>description</code>,
+  <code>model</code>, <code>effort</code>, <code>maxTurns</code>, <code>tools</code>,
+  <code>disallowedTools</code>, <code>skills</code>, <code>memory</code>,
+  <code>background</code> এবং <code>isolation</code>।
+</p>
+
+<h2>২.৪ Hook</h2>
+
+<p>
+  Hook হলো ঘটনার সঙ্গে বাঁধা command। উদাহরণস্বরূপ, Claude প্রতিবার কোনো ফাইল
+  <code>Write</code> বা <code>Edit</code> করার পরে যদি আপনি formatter চালাতে চান:
+</p>
+
+<p class="filename">hooks/hooks.json</p>
+<pre><code>{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/scripts/format.sh"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+<p>
+  Hook-এর ধরন হতে পারে <code>command</code>, <code>http</code>, <code>mcp_tool</code>,
+  <code>prompt</code> বা <code>agent</code>। ঘটনার তালিকায় আছে <code>SessionStart</code>,
+  <code>Setup</code>, <code>UserPromptSubmit</code>, <code>PreToolUse</code>,
+  <code>PostToolUse</code>, <code>PostToolUseFailure</code>, <code>PostToolBatch</code>,
+  <code>Stop</code>, <code>SessionEnd</code> সহ আরও অনেক কিছু।
+</p>
+
+<h2>২.৫ MCP server</h2>
+
+<p>
+  MCP (Model Context Protocol) server-এর মাধ্যমে Claude বাইরের service-এর সঙ্গে যুক্ত হয়।
+  Plugin-এ <code>.mcp.json</code> ফাইলে server-গুলো ঘোষণা করা হয়:
+</p>
+
+<p class="filename">.mcp.json</p>
+<pre><code>{
+  "mcpServers": {
+    "database": {
+      "command": "python",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server.py"],
+      "env": {
+        "DB_PATH": "${CLAUDE_PLUGIN_DATA}/db"
+      }
+    }
+  }
+}</code></pre>
+
+<h2>২.৬ LSP server</h2>
+
+<p>
+  LSP server Claude-কে কোড বোঝার ক্ষমতা দেয় — definition-এ যাওয়া, reference খোঁজা এবং
+  সম্পাদনার পরপরই type error দেখা। <code>.lsp.json</code>-এ ভাষা অনুযায়ী কনফিগারেশন:
+</p>
+
+<p class="filename">.lsp.json</p>
+<pre><code>{
+  "go": {
+    "command": "gopls",
+    "args": ["serve"],
+    "extensionToLanguage": {
+      ".go": "go"
+    }
+  }
+}</code></pre>
+
+<p>
+  বাধ্যতামূলক ক্ষেত্র দুটি: <code>command</code> (binary-টি <code>PATH</code>-এ থাকতে হবে) এবং
+  <code>extensionToLanguage</code>। ঐচ্ছিক ক্ষেত্রগুলোর মধ্যে আছে <code>args</code>,
+  <code>env</code>, <code>settings</code>, <code>startupTimeout</code>,
+  <code>restartOnCrash</code> ও <code>diagnostics</code>।
+</p>
+
+<h2>২.৭ তিনটি environment variable</h2>
+
+<p>
+  Plugin-এর ভেতরের path লেখার সময় এই তিনটি variable ব্যবহার করা যায়। Hook, MCP server ও
+  LSP server-এর subprocess-এ এগুলো পাঠানো হয়:
+</p>
+
+<table>
+  <colgroup><col style="width:31%"><col style="width:32%"><col style="width:37%"></colgroup>
+  <thead><tr><th>Variable</th><th>যা নির্দেশ করে</th><th>কী কাজে</th></tr></thead>
+  <tbody>
+    <tr><td><code>${CLAUDE_PLUGIN_ROOT}</code></td><td>Plugin ফোল্ডারের পূর্ণ path</td><td>সঙ্গে দেওয়া script, binary ও config ফাইল</td></tr>
+    <tr><td><code>${CLAUDE_PLUGIN_DATA}</code></td><td><code>~/.claude/plugins/data/{id}/</code></td><td>স্থায়ী তথ্য, cache, নির্ভরশীল ফাইল</td></tr>
+    <tr><td><code>${CLAUDE_PROJECT_DIR}</code></td><td>প্রকল্পের root</td><td>প্রকল্পের নিজস্ব script</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== অধ্যায় ৩ ==================== -->
+<h1><span class="chno">অধ্যায় ৩</span>Marketplace কীভাবে কাজ করে</h1>
+
+<p class="lead">
+  Plugin ইনস্টলের ব্যাপারটা দুই ধাপের। প্রথমে <strong>marketplace</strong> যোগ করতে হয় —
+  এটি কেবল একটি ক্যাটালগ নিবন্ধন করে, কোনো plugin ইনস্টল হয় না। তারপর সেই ক্যাটালগ থেকে
+  আপনি পছন্দমতো plugin ইনস্টল করেন।
+</p>
+
+<h2>৩.১ দুই ধাপের মডেল</h2>
+
+<ol class="steps">
+  <li>
+    <strong>Marketplace যোগ করুন</strong> — এতে ক্যাটালগটি Claude Code-এ নিবন্ধিত হয় এবং
+    আপনি দেখতে পান কী কী পাওয়া যাচ্ছে। এই ধাপে কিছুই ইনস্টল হয় না।
+  </li>
+  <li>
+    <strong>Plugin ইনস্টল করুন</strong> — ক্যাটালগ ঘেঁটে যেটি দরকার সেটি বেছে নিয়ে ইনস্টল করুন।
+  </li>
+</ol>
+
+<h2>৩.২ Anthropic-এর তিনটি marketplace</h2>
+
+<table class="long">
+  <colgroup><col style="width:27%"><col style="width:73%"></colgroup>
+  <thead><tr><th>Marketplace</th><th>পরিচিতি</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>claude-plugins-official</code></td>
+      <td>
+        Anthropic-এর নিজস্ব বাছাই করা তালিকা। প্রথমবার interactive ভাবে Claude Code চালু করলে
+        এটি <strong>স্বয়ংক্রিয়ভাবে</strong> যুক্ত হয়ে যায়। যুক্ত না হলে নিজে যোগ করুন:<br>
+        <code>/plugin marketplace add anthropics/claude-plugins-official</code>
+      </td>
+    </tr>
+    <tr>
+      <td><code>claude-community</code></td>
+      <td>
+        তৃতীয় পক্ষের plugin, যেগুলো Anthropic-এর স্বয়ংক্রিয় যাচাই ও নিরাপত্তা পরীক্ষায় উত্তীর্ণ হয়েছে।
+        প্রতিটি entry নির্দিষ্ট commit SHA-তে pin করা থাকে। নিজে যোগ করতে হয়:<br>
+        <code>/plugin marketplace add anthropics/claude-plugins-community</code>
+      </td>
+    </tr>
+    <tr>
+      <td><code>claude-code-plugins</code></td>
+      <td>
+        উদাহরণ হিসেবে তৈরি demo marketplace, যা plugin দিয়ে কী কী সম্ভব তা দেখায়। যোগ করতে:<br>
+        <code>/plugin marketplace add anthropics/claude-code</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="box">
+  <span class="lbl">নোট</span>
+  <p>
+    Official marketplace-এ কোন plugin থাকবে তা Anthropic নিজে ঠিক করে; এর জন্য আবেদন করার
+    ব্যবস্থা নেই। অ্যাপের ভেতরের submission form দিয়ে plugin জমা দিলে তা
+    <strong>community</strong> marketplace-এ যায়, official-এ নয়।
+  </p>
+</div>
+
+<h2>৩.৩ Marketplace যোগ করার চারটি উপায়</h2>
+
+<h3>ক. GitHub repository থেকে</h3>
+
+<p>
+  যে repository-তে <code>.claude-plugin/marketplace.json</code> ফাইল আছে, তার
+  <code>owner/repo</code> লিখলেই হয়:
+</p>
+<pre><code>/plugin marketplace add anthropics/claude-code</code></pre>
+
+<h3>খ. অন্য git host থেকে</h3>
+
+<p>পূর্ণ URL দিতে হয়। <code>.git</code> suffix লাগবে কি না তা host-ভেদে আলাদা:</p>
+
+<table class="long">
+  <colgroup><col style="width:33%"><col style="width:67%"></colgroup>
+  <thead><tr><th>Host</th><th>নিয়ম</th></tr></thead>
+  <tbody>
+    <tr><td><code>github.com</code>, <code>gitlab.com</code></td><td><code>.git</code> থাকুক বা না থাকুক — দুটোই চলে।</td></tr>
+    <tr><td>Azure DevOps</td><td><code>.git</code> <strong>বাদ</strong> দিন। path-এ <code>/_git/</code> থাকলে Claude Code নিজেই clone করে; suffix জুড়লে clone ব্যর্থ হয়।</td></tr>
+    <tr><td>অন্য সব host<br>(self-managed GitLab সহ)</td><td><code>.git</code> suffix <strong>দিন</strong>, নাহলে URL-টিকে সরাসরি <code>marketplace.json</code>-এর লিঙ্ক ধরে নেওয়া হবে।</td></tr>
+  </tbody>
+</table>
+
+<pre><code><span class="cm"># HTTPS</span>
+/plugin marketplace add https://gitlab.com/company/plugins.git
+
+<span class="cm"># SSH</span>
+/plugin marketplace add git@gitlab.com:company/plugins.git
+
+<span class="cm"># নির্দিষ্ট branch বা tag</span>
+/plugin marketplace add https://gitlab.com/company/plugins.git#v1.0.0</code></pre>
+
+<div class="box warn">
+  <span class="lbl">সতর্কতা</span>
+  <p>
+    URL-এ <code>https://</code> অংশটি অবশ্যই লিখুন। শুধু <code>gitlab.com/company/plugins.git</code>
+    লিখলে Claude Code v2.1.196 ও পরবর্তী সংস্করণ এটিকে ভুল GitHub <code>owner/repo</code> ধরে
+    বাতিল করে দেয়।
+  </p>
+</div>
+
+<h3>গ. স্থানীয় ফোল্ডার থেকে</h3>
+<pre><code><span class="cm"># marketplace.json আছে এমন ফোল্ডার</span>
+/plugin marketplace add ./my-marketplace
+
+<span class="cm"># অথবা সরাসরি ফাইলের path</span>
+/plugin marketplace add ./path/to/marketplace.json</code></pre>
+
+<h3>ঘ. Remote URL থেকে</h3>
+<pre><code>/plugin marketplace add https://example.com/marketplace.json</code></pre>
+
+<div class="box tip">
+  <span class="lbl">টিপস</span>
+  <p>
+    সংক্ষেপে লিখতে চাইলে <code>/plugin marketplace</code>-এর বদলে <code>/plugin market</code>
+    এবং <code>remove</code>-এর বদলে <code>rm</code> ব্যবহার করা যায়।
+  </p>
+</div>
+
+<!-- ==================== অধ্যায় ৪ ==================== -->
+<h1><span class="chno">অধ্যায় ৪</span>অত্যাবশ্যকীয় Plugin-এর তালিকা</h1>
+
+<p class="lead">
+  Official marketplace <code>claude-plugins-official</code>-এ plugin-গুলো কয়েকটি শ্রেণিতে ভাগ করা।
+  নিচে প্রতিটি শ্রেণির plugin, তার কাজ এবং প্রয়োজনীয় পূর্বশর্ত দেওয়া হলো। ইনস্টলের সাধারণ নিয়ম:
+</p>
+
+<pre><code>/plugin install &lt;plugin-name&gt;@claude-plugins-official</code></pre>
+
+<h2>৪.১ Code intelligence (LSP) plugin</h2>
+
+<p>
+  এই plugin-গুলো Claude Code-এর ভেতরের LSP tool চালু করে। ফলে Claude
+  definition-এ যেতে পারে, reference খুঁজতে পারে, এবং প্রতিটি সম্পাদনার পরপরই
+  type error দেখতে পায়। এতে দুটি বড় সুবিধা:
+</p>
+
+<ul>
+  <li><strong>স্বয়ংক্রিয় diagnostics</strong> — Claude ফাইল সম্পাদনা করার পরপরই language server error ও warning জানিয়ে দেয়। compiler বা linter আলাদা করে চালাতে হয় না; ভুল করলে Claude সেই turn-এই সেটি ঠিক করে নেয়।</li>
+  <li><strong>Code navigation</strong> — definition, reference, hover type, symbol তালিকা, implementation ও call hierarchy — grep-ভিত্তিক খোঁজার চেয়ে অনেক নির্ভুল।</li>
+</ul>
+
+<table class="long">
+  <colgroup><col style="width:20%"><col style="width:28%"><col style="width:52%"></colgroup>
+  <thead><tr><th>ভাষা</th><th>Plugin</th><th>যে binary আগে ইনস্টল করতে হবে</th></tr></thead>
+  <tbody>
+    <tr><td>TypeScript</td><td><code>typescript-lsp</code></td><td><code>typescript-language-server</code></td></tr>
+    <tr><td>Python</td><td><code>pyright-lsp</code></td><td><code>pyright-langserver</code></td></tr>
+    <tr><td>Rust</td><td><code>rust-analyzer-lsp</code></td><td><code>rust-analyzer</code></td></tr>
+    <tr><td>Go</td><td><code>gopls-lsp</code></td><td><code>gopls</code></td></tr>
+    <tr><td>C / C++</td><td><code>clangd-lsp</code></td><td><code>clangd</code></td></tr>
+    <tr><td>C#</td><td><code>csharp-lsp</code></td><td><code>csharp-ls</code></td></tr>
+    <tr><td>Java</td><td><code>jdtls-lsp</code></td><td><code>jdtls</code></td></tr>
+    <tr><td>Kotlin</td><td><code>kotlin-lsp</code></td><td><code>kotlin-language-server</code></td></tr>
+    <tr><td>Lua</td><td><code>lua-lsp</code></td><td><code>lua-language-server</code></td></tr>
+    <tr><td>PHP</td><td><code>php-lsp</code></td><td><code>intelephense</code></td></tr>
+    <tr><td>Swift</td><td><code>swift-lsp</code></td><td><code>sourcekit-lsp</code></td></tr>
+  </tbody>
+</table>
+
+<div class="box warn">
+  <span class="lbl">সতর্কতা</span>
+  <p>
+    Plugin-টি language server-এর binary <strong>নিজে ইনস্টল করে না</strong> — সেটি আপনাকে
+    আলাদাভাবে ইনস্টল করতে হবে। ইনস্টলের পরে <code>/plugin</code>-এর <strong>Errors</strong>
+    ট্যাবে <code>Executable not found in $PATH</code> দেখলে বুঝবেন binary-টি অনুপস্থিত।
+    এছাড়া cloud session-এ Claude Code plugin-এর language server চালু করে না, তাই সেখানে
+    LSP tool পাওয়া যায় না।
+  </p>
+</div>
+
+<h2>৪.২ External integration — বাইরের service-এর সংযোগ</h2>
+
+<p>
+  এই plugin-গুলোর সঙ্গে আগে থেকেই কনফিগার করা MCP server দেওয়া থাকে, ফলে হাতে হাতে
+  সেটআপ ছাড়াই Claude-কে বাইরের service-এর সঙ্গে যুক্ত করা যায়।
+</p>
+
+<table class="long">
+  <colgroup><col style="width:20%"><col style="width:22%"><col style="width:58%"></colgroup>
+  <thead><tr><th>শ্রেণি</th><th>Plugin</th><th>কাজ</th></tr></thead>
+  <tbody>
+    <tr><td rowspan="2">Source control</td><td><code>github</code></td><td>Pull request, issue, review comment, CI-র অবস্থা — সরাসরি Claude থেকে দেখা ও পরিচালনা</td></tr>
+    <tr><td><code>gitlab</code></td><td>GitLab-এর merge request, issue ও pipeline-এর সঙ্গে সংযোগ</td></tr>
+    <tr><td rowspan="4">Project management</td><td><code>atlassian</code></td><td>Jira ও Confluence — ticket পড়া, আপডেট করা, ডকুমেন্ট খোঁজা</td></tr>
+    <tr><td><code>asana</code></td><td>Asana-র task ও project-এর সঙ্গে কাজ</td></tr>
+    <tr><td><code>linear</code></td><td>Linear-এর issue তৈরি, খোঁজা ও অবস্থা পরিবর্তন</td></tr>
+    <tr><td><code>notion</code></td><td>Notion-এর page ও database পড়া ও লেখা</td></tr>
+    <tr><td>Design</td><td><code>figma</code></td><td>Figma-র ডিজাইন থেকে কোড তৈরি এবং কোড থেকে ডিজাইন তৈরি</td></tr>
+    <tr><td rowspan="3">Infrastructure</td><td><code>vercel</code></td><td>Deployment, build log, runtime error ও project ব্যবস্থাপনা</td></tr>
+    <tr><td><code>firebase</code></td><td>Firebase-এর প্রকল্প ও service-এর সঙ্গে সংযোগ</td></tr>
+    <tr><td><code>supabase</code></td><td>Supabase-এর database ও backend পরিচালনা</td></tr>
+    <tr><td>Communication</td><td><code>slack</code></td><td>Slack-এর চ্যানেল ও বার্তার সঙ্গে কাজ</td></tr>
+    <tr><td>Monitoring</td><td><code>sentry</code></td><td>Sentry-তে ধরা পড়া error ও stack trace বিশ্লেষণ</td></tr>
+  </tbody>
+</table>
+
+<h2>৪.৩ নিরাপত্তা</h2>
+
+<table>
+  <colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+  <thead><tr><th>Plugin</th><th>কাজ</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>security-guidance</code></td>
+      <td>
+        Claude-এর করা প্রতিটি পরিবর্তন পরীক্ষা করে সাধারণ নিরাপত্তা-দুর্বলতা খোঁজে এবং
+        যা পায় তা একই session-এই ঠিক করার নির্দেশ দেয়। প্রকল্পভিত্তিক নিজস্ব নিয়মও যোগ করা যায়।
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>৪.৪ Development workflow</h2>
+
+<table class="long">
+  <colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+  <thead><tr><th>Plugin</th><th>কাজ</th></tr></thead>
+  <tbody>
+    <tr><td><code>commit-commands</code></td><td>Git-এর কাজের skill — commit করা, push করা এবং pull request তৈরি। যেমন <code>/commit-commands:commit</code> চালালে পরিবর্তন stage হয়, commit message তৈরি হয় এবং commit হয়ে যায়।</td></tr>
+    <tr><td><code>pr-review-toolkit</code></td><td>Pull request পর্যালোচনার জন্য বিশেষায়িত agent-এর সংগ্রহ।</td></tr>
+    <tr><td><code>agent-sdk-dev</code></td><td>Claude Agent SDK দিয়ে কিছু বানাতে গেলে প্রয়োজনীয় টুল ও নির্দেশনা।</td></tr>
+    <tr><td><code>plugin-dev</code></td><td>নিজের plugin তৈরির পূর্ণ toolkit — এই বইয়ের অধ্যায় ৭ পড়ার পাশাপাশি এটি ইনস্টল করে নিলে কাজ অনেক সহজ হয়।</td></tr>
+  </tbody>
+</table>
+
+<h2>৪.৫ Output style</h2>
+
+<table>
+  <colgroup><col style="width:32%"><col style="width:68%"></colgroup>
+  <thead><tr><th>Plugin</th><th>কাজ</th></tr></thead>
+  <tbody>
+    <tr><td><code>explanatory-output-style</code></td><td>Claude কেন কোন সিদ্ধান্ত নিল — বাস্তবায়নের পেছনের যুক্তি ব্যাখ্যা করে বলে।</td></tr>
+    <tr><td><code>learning-output-style</code></td><td>শেখার উপযোগী interactive ধরন, যেখানে কাজ করতে করতে দক্ষতা তৈরি হয়।</td></tr>
+  </tbody>
+</table>
+
+<h2>৪.৬ কোনগুলো দিয়ে শুরু করবেন</h2>
+
+<p>
+  সব plugin একসঙ্গে ইনস্টল করার দরকার নেই — প্রতিটি context-এর খরচ বাড়ায়। একজন সাধারণ
+  ডেভেলপারের জন্য নিচের চারটি দিয়ে শুরু করাই যথেষ্ট:
+</p>
+
+<table>
+  <colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+  <thead><tr><th>ইনস্টল করুন</th><th>কারণ</th></tr></thead>
+  <tbody>
+    <tr><td><code>&lt;আপনার ভাষার&gt;-lsp</code></td><td>সবচেয়ে বেশি ফল দেয় — Claude-এর ভুল সঙ্গে সঙ্গে ধরা পড়ে</td></tr>
+    <tr><td><code>github</code> বা <code>gitlab</code></td><td>PR ও issue নিয়ে কাজ টার্মিনাল ছাড়াই করা যায়</td></tr>
+    <tr><td><code>commit-commands</code></td><td>প্রতিদিনের git-এর কাজ দ্রুত হয়</td></tr>
+    <tr><td><code>security-guidance</code></td><td>নিরাপত্তার ভুল কোডে ঢোকার আগেই ধরা পড়ে</td></tr>
+  </tbody>
+</table>
+
+<p>
+  প্রয়োজন বুঝে পরে <code>linear</code>, <code>notion</code>, <code>sentry</code> বা
+  <code>figma</code>-র মতো integration যোগ করে নিতে পারেন। পুরো ক্যাটালগ দেখতে
+  <code>/plugin</code> চালিয়ে <strong>Discover</strong> ট্যাবে যান, অথবা
+  <span class="en">claude.com/plugins</span> ঠিকানায় দেখুন।
+</p>
+
+<!-- ==================== অধ্যায় ৫ ==================== -->
+<h1><span class="chno">অধ্যায় ৫</span>ধাপে ধাপে Plugin সংযোজন</h1>
+
+<p class="lead">
+  এই অধ্যায়ে তিনটি আলাদা পরিবেশের জন্য পূর্ণাঙ্গ নির্দেশনা দেওয়া হয়েছে —
+  টার্মিনালের <strong>CLI</strong>, <strong>Desktop app</strong> এবং
+  <strong>Web / Cloud session</strong>। আপনি যেটি ব্যবহার করেন, সেই অংশটি অনুসরণ করুন।
+</p>
+
+<h2>৫.১ Claude Code CLI (টার্মিনাল)</h2>
+
+<p>
+  এটিই সবচেয়ে পূর্ণাঙ্গ পথ — <code>/plugin</code> command এখানেই পাওয়া যায়।
+  উদাহরণ হিসেবে আমরা demo marketplace থেকে <code>commit-commands</code> plugin-টি ইনস্টল করব।
+</p>
+
+<ol class="steps">
+  <li>
+    <p><strong>Marketplace যোগ করুন।</strong> Claude Code চালু অবস্থায় লিখুন:</p>
+    <pre><code>/plugin marketplace add anthropics/claude-code</code></pre>
+    <p class="small">
+      এতে ক্যাটালগটি ডাউনলোড হয়ে তার plugin-গুলো আপনার জন্য উন্মুক্ত হয়।
+      Official marketplace-টি সাধারণত আগে থেকেই যোগ করা থাকে, তাই সেখান থেকে ইনস্টল করলে
+      এই ধাপটি লাগে না।
+    </p>
+  </li>
+
+  <li>
+    <p><strong>Plugin manager খুলুন।</strong> লিখুন:</p>
+    <pre><code>/plugin</code></pre>
+    <p>চারটি ট্যাব আসবে; <strong>Tab</strong> চেপে সামনে আর <strong>Shift+Tab</strong> চেপে পেছনে যাওয়া যায়:</p>
+    <table>
+      <colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+      <tbody>
+        <tr><td><strong>Discover</strong></td><td>আপনার যোগ করা সব marketplace-এর plugin দেখা</td></tr>
+        <tr><td><strong>Installed</strong></td><td>ইনস্টল করা plugin দেখা ও পরিচালনা</td></tr>
+        <tr><td><strong>Marketplaces</strong></td><td>Marketplace যোগ, বাদ ও হালনাগাদ করা</td></tr>
+        <tr><td><strong>Errors</strong></td><td>Plugin লোড হতে গিয়ে হওয়া ত্রুটি দেখা</td></tr>
+      </tbody>
+    </table>
+  </li>
+
+  <li>
+    <p><strong>Plugin বেছে নিয়ে বিবরণ দেখুন।</strong> <strong>Discover</strong> ট্যাবে গিয়ে একটি plugin
+    নির্বাচন করলে details pane-এ যা দেখবেন:</p>
+    <ul>
+      <li><strong>Context cost</strong> — প্রতিটি turn-এ কত token যোগ হবে তার হিসাব</li>
+      <li><strong>Last updated</strong> — সর্বশেষ কবে হালনাগাদ হয়েছে</li>
+      <li><strong>Will install</strong> — ঠিক কোন কোন command, agent, skill, hook, MCP ও LSP server যুক্ত হবে তার তালিকা</li>
+    </ul>
+    <p class="small">
+      সব plugin এই তথ্য সরবরাহ করে না। স্থানীয় বা custom marketplace-এর ক্ষেত্রে
+      Context cost ও Last updated না-ও দেখা যেতে পারে, এবং Will install-এর জায়গায়
+      <em>Components will be discovered at installation</em> লেখা থাকতে পারে।
+    </p>
+  </li>
+
+  <li>
+    <p><strong>Scope নির্বাচন করুন।</strong> ইনস্টলের সময় তিনটি বিকল্প আসে:</p>
+    <table>
+      <colgroup><col style="width:22%"><col style="width:78%"></colgroup>
+      <tbody>
+        <tr><td><strong>User</strong></td><td>শুধু আপনার জন্য, কিন্তু সব প্রকল্পে</td></tr>
+        <tr><td><strong>Project</strong></td><td>এই repository-র সব সহযোগীর জন্য (<code>.claude/settings.json</code>-এ যুক্ত হয়)</td></tr>
+        <tr><td><strong>Local</strong></td><td>শুধু আপনার জন্য, শুধু এই repository-তে</td></tr>
+      </tbody>
+    </table>
+  </li>
+
+  <li>
+    <p><strong>ইনস্টল করুন।</strong> মেনু থেকে নির্বাচন করে <strong>Enter</strong> চাপুন, অথবা
+    সরাসরি command লিখুন:</p>
+    <pre><code>/plugin install commit-commands@claude-code-plugins</code></pre>
+    <p>সাধারণ গঠনটি হলো:</p>
+    <pre><code>/plugin install &lt;plugin-name&gt;@&lt;marketplace-name&gt;</code></pre>
+  </li>
+
+  <li>
+    <p><strong>ইনস্টলের সারসংক্ষেপ পড়ুন।</strong> দুটি বার্তার যেকোনো একটি আসবে:</p>
+    <table>
+      <colgroup><col style="width:42%"><col style="width:58%"></colgroup>
+      <tbody>
+        <tr><td><code>Plugin is now active.</code></td><td>কিছু করার নেই, plugin চালু হয়ে গেছে</td></tr>
+        <tr><td><code>Run /reload-plugins to activate.</code></td><td>নিচের ধাপটি চালাতে হবে</td></tr>
+      </tbody>
+    </table>
+    <pre><code>/reload-plugins</code></pre>
+    <p class="small">
+      Reload করলে prompt cache বাতিল হয়ে যেতে পারে — সেক্ষেত্রে Claude Code সতর্ক করে থেমে যায়।
+      তখন <code>/reload-plugins --force</code> দিয়ে আবার চালান।
+    </p>
+  </li>
+
+  <li>
+    <p><strong>Plugin ব্যবহার করুন।</strong> Plugin-এর skill namespace সহ ডাকতে হয়:</p>
+    <pre><code>/commit-commands:commit</code></pre>
+    <p class="small">
+      এতে আপনার পরিবর্তন stage হবে, একটি commit message তৈরি হবে এবং commit হয়ে যাবে।
+      কোন plugin কী কী skill দেয় তা <strong>Discover</strong> ট্যাবের বিবরণে অথবা
+      plugin-এর homepage-এ পাওয়া যায়।
+    </p>
+  </li>
+</ol>
+
+<h3>Interactive ধাপ ছাড়া ইনস্টল</h3>
+
+<p>
+  Script-এ ব্যবহারের জন্য shell command রয়েছে, যা কোনো মেনু খোলে না। এটি ডিফল্টভাবে
+  user scope-এ ইনস্টল করে:
+</p>
+<pre><code>claude plugin install formatter@your-org --scope project
+claude plugin uninstall formatter@your-org --scope project</code></pre>
+
+<div class="box">
+  <span class="lbl">নোট</span>
+  <p>
+    <code>claude plugin install</code> চলমান session-এর ভেতরে চলে না, তাই ইনস্টল করা plugin
+    পরের বার Claude Code চালু করলে লোড হবে — অথবা খোলা session-এ
+    <code>/reload-plugins</code> চালালে।
+  </p>
+</div>
+
+<h2>৫.২ Claude Desktop app</h2>
+
+<p>
+  Desktop app-এ টার্মিনাল ছাড়াই plugin ইনস্টল করা যায়। App-এর তিনটি ট্যাবের মধ্যে
+  <strong>Code</strong> ট্যাবটি সফটওয়্যার ডেভেলপমেন্টের জন্য।
+</p>
+
+<ol class="steps">
+  <li>
+    <p><strong>Plugin মেনু খুলুন।</strong> Prompt box-এর পাশে <strong>+</strong> বোতামে ক্লিক করে
+    <strong>Plugins</strong> নির্বাচন করুন। এখানে ইনস্টল করা plugin ও তাদের skill-এর তালিকা দেখা যায়।</p>
+  </li>
+  <li>
+    <p><strong>Plugin browser খুলুন।</strong> ওই submenu থেকে <strong>Add plugin</strong> বেছে নিন।
+    Plugin browser খুলবে, যেখানে আপনার কনফিগার করা সব marketplace-এর — official Anthropic
+    marketplace সহ — plugin দেখা যাবে।</p>
+  </li>
+  <li>
+    <p><strong>Scope বেছে ইনস্টল করুন।</strong> CLI-র মতোই user account, নির্দিষ্ট project,
+    অথবা local — এই তিনটি scope-এর যেকোনো একটিতে ইনস্টল করা যায়।</p>
+  </li>
+  <li>
+    <p><strong>পরিচালনা করুন।</strong> Plugin চালু, বন্ধ বা মুছে ফেলতে submenu থেকে
+    <strong>Manage plugins</strong> নির্বাচন করুন।</p>
+  </li>
+  <li>
+    <p><strong>এক জায়গায় সবকিছু।</strong> Connector, skill ও plugin একসঙ্গে পরিচালনা করতে
+    sidebar-এর <strong>Customize</strong>-এ ক্লিক করুন।</p>
+    <p class="small">
+      Desktop app-এর <strong>Cowork</strong> ট্যাবটি তার skill, plugin ও connector এই
+      Customize কনফিগারেশন থেকেই নেয় — CLI-র <code>~/.claude</code> ডিরেক্টরি থেকে নয়।
+      এটি আপনার claude.ai অ্যাকাউন্টের মাধ্যমে sync হয়।
+    </p>
+  </li>
+</ol>
+
+<div class="box warn">
+  <span class="lbl">সতর্কতা — Desktop app-এর সীমাবদ্ধতা</span>
+  <p>
+    Plugin browser <strong>cloud session-এ পাওয়া যায় না</strong>, এবং desktop app থেকে
+    ইনস্টল করা plugin cloud session-এ কাজ করে না। এছাড়া <strong>WSL session-এ</strong>
+    plugin ব্যবহার করা যায় না। Cloud session-এ plugin দরকার হলে পরের অংশটি দেখুন।
+  </p>
+</div>
+
+<p class="small">
+  Plugin browser স্থানীয় ও SSH session-এ কাজ করে। SSH-এর ক্ষেত্রে দূরবর্তী মেশিনটি
+  Linux বা macOS হতে হবে; প্রথমবার সংযোগ করলে Desktop নিজেই সেখানে Claude Code ইনস্টল করে নেয়।
+</p>
+
+<h2>৫.৩ Web ও Cloud session</h2>
+
+<p>
+  Claude Code যখন claude.ai-তে বা cloud environment-এ চলে, তখন <code>/plugin</code> মেনু
+  থাকে না। সেখানে plugin যোগ করার দুটি পথ আছে।
+</p>
+
+<h3>পথ ১ — repository-র settings ফাইলে ঘোষণা</h3>
+
+<p>
+  প্রকল্পের <code>.claude/settings.json</code> ফাইলে plugin ঘোষণা করলে Claude Code
+  session শুরুর সময়ই সেটি ইনস্টল করে নেয়। Marketplace-টিও একই ফাইলে নিবন্ধন করতে হবে:
+</p>
+
+<p class="filename">.claude/settings.json</p>
+<pre><code>{
+  "extraKnownMarketplaces": {
+    "my-team-tools": {
+      "source": {
+        "source": "github",
+        "repo": "your-org/claude-plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "formatter@my-team-tools": true,
+    "legacy-helper@my-team-tools": false
+  }
+}</code></pre>
+
+<p>
+  <code>enabledPlugins</code>-এ প্রতিটি plugin-এর পরিচয় <code>plugin-name@marketplace-name</code>
+  আকারে লিখে <code>true</code> বা <code>false</code> দিতে হয়। এই ফাইলটি version control-এ
+  থাকায় দলের সবাই একই কনফিগারেশন পান।
+</p>
+
+<h3>পথ ২ — claude.ai অ্যাকাউন্টে চালু করা</h3>
+
+<p>
+  আপনার claude.ai অ্যাকাউন্টে plugin-টি চালু করে রাখলে Claude Code সেটিকে
+  <strong>synced plugin</strong> হিসেবে লোড করে। এতে repository-তে কিছু যোগ না করেও
+  cloud session-এ plugin পাওয়া যায়।
+</p>
+
+<h2>৫.৪ তিনটি পরিবেশের তুলনা</h2>
+
+<table class="long">
+  <colgroup><col style="width:34%"><col style="width:22%"><col style="width:22%"><col style="width:22%"></colgroup>
+  <thead><tr><th>বৈশিষ্ট্য</th><th>CLI</th><th>Desktop</th><th>Web / Cloud</th></tr></thead>
+  <tbody>
+    <tr><td><code>/plugin</code> মেনু</td><td>আছে</td><td>Plugin browser</td><td>নেই</td></tr>
+    <tr><td>Marketplace যোগ করা</td><td>Command দিয়ে</td><td>UI দিয়ে</td><td><code>extraKnownMarketplaces</code></td></tr>
+    <tr><td>Plugin ইনস্টল</td><td><code>/plugin install</code></td><td>Add plugin</td><td><code>enabledPlugins</code> বা synced</td></tr>
+    <tr><td>Scope নির্বাচন</td><td>তিনটিই</td><td>তিনটিই</td><td>Repository-নির্ভর</td></tr>
+    <tr><td>LSP server চালু হয়</td><td>হ্যাঁ</td><td>হ্যাঁ</td><td>না</td></tr>
+    <tr><td>Session-এ reload</td><td><code>/reload-plugins</code></td><td><code>/reload-plugins</code></td><td>Session শুরুতে</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== অধ্যায় ৬ ==================== -->
+<h1><span class="chno">অধ্যায় ৬</span>ব্যবস্থাপনা, Scope ও হালনাগাদ</h1>
+
+<p class="lead">
+  ইনস্টল করার পরের কাজ — কোন plugin কোথায় চালু থাকবে, কোনটি বন্ধ রাখবেন, আর কখন
+  হালনাগাদ হবে তা ঠিক করা।
+</p>
+
+<h2>৬.১ চারটি scope</h2>
+
+<table class="long">
+  <colgroup><col style="width:16%"><col style="width:36%"><col style="width:48%"></colgroup>
+  <thead><tr><th>Scope</th><th>Settings ফাইল</th><th>কোথায় কার্যকর</th></tr></thead>
+  <tbody>
+    <tr><td><code>user</code></td><td><code>~/.claude/settings.json</code></td><td>আপনার সব প্রকল্পে (ডিফল্ট)</td></tr>
+    <tr><td><code>project</code></td><td><code>.claude/settings.json</code></td><td>Version control-এর মাধ্যমে পুরো দলের জন্য</td></tr>
+    <tr><td><code>local</code></td><td><code>.claude/settings.local.json</code></td><td>শুধু এই প্রকল্পে, শুধু আপনার জন্য (gitignore করা)</td></tr>
+    <tr><td><code>managed</code></td><td>Managed settings</td><td>প্রতিষ্ঠানের প্রশাসক নিয়ন্ত্রিত — ব্যবহারকারী বদলাতে পারেন না</td></tr>
+  </tbody>
+</table>
+
+<h2>৬.২ দৈনন্দিন command</h2>
+
+<pre><code><span class="cm"># ইনস্টল করা plugin-এর তালিকা</span>
+/plugin list
+/plugin list --enabled
+/plugin list --disabled
+
+<span class="cm"># একটি plugin-এর বিস্তারিত</span>
+/plugin info plugin-name
+
+<span class="cm"># না মুছে সাময়িকভাবে বন্ধ রাখা</span>
+/plugin disable plugin-name@marketplace-name
+
+<span class="cm"># আবার চালু করা</span>
+/plugin enable plugin-name@marketplace-name
+
+<span class="cm"># সম্পূর্ণ মুছে ফেলা</span>
+/plugin uninstall plugin-name@marketplace-name</code></pre>
+
+<div class="box">
+  <span class="lbl">নোট</span>
+  <p>
+    <code>/plugin disable</code>, <code>/plugin enable</code> ও <code>/plugin uninstall</code>
+    চালালে Claude Code plugin panel খুলে পরিবর্তনটি প্রয়োগ করে এবং panel খোলা রেখে দেয়।
+    পরের command লেখার আগে <strong>Esc</strong> চেপে panel বন্ধ করুন। Script-এর জন্য
+    <code>claude plugin</code> shell command ব্যবহার করুন — সেগুলো panel খোলে না।
+  </p>
+</div>
+
+<p>
+  উপরের পরিচয়গুলোতে <code>plugin-name</code> বলতে <strong>marketplace entry-র</strong> নাম বোঝায়,
+  যা plugin-এর নিজের <code>plugin.json</code>-এর <code>name</code> থেকে আলাদা হতে পারে।
+</p>
+
+<h2>৬.৩ Installed ট্যাব</h2>
+
+<p>
+  <code>/plugin</code> চালিয়ে <strong>Installed</strong> ট্যাবে গেলে তালিকাটি scope অনুযায়ী
+  ভাগ করা থাকে এবং সমস্যাগুলো আগে দেখানো হয় — লোড হতে ব্যর্থ বা নির্ভরতা অমীমাংসিত
+  plugin সবার উপরে, তারপর আপনার প্রিয় (favorite) plugin, আর বন্ধ করা plugin সবার নিচে
+  একটি ভাঁজ করা শিরোনামের আড়ালে।
+</p>
+
+<ul>
+  <li><code>f</code> চেপে কোনো plugin favorite করা বা বাদ দেওয়া যায়</li>
+  <li>টাইপ করে নাম বা বর্ণনা দিয়ে ছেঁকে নেওয়া যায়</li>
+  <li><strong>Enter</strong> চেপে বিস্তারিত দেখে সেখান থেকেই enable, disable বা uninstall করা যায়</li>
+</ul>
+
+<h3>Not used recently</h3>
+
+<p>
+  আপনি নিজে ইনস্টল করেছেন কিন্তু অন্তত দুই সপ্তাহ ও অন্তত ১০টি session ধরে ব্যবহার করেননি —
+  এমন plugin <strong>Not used recently</strong> শিরোনামে আলাদা দেখানো হয়, সঙ্গে
+  <strong>Last used</strong> তারিখ। যেগুলো আর কাজে লাগছে না অথচ প্রতিটি session-এ
+  context ও startup খরচ বাড়াচ্ছে, সেগুলো এখান থেকে খুঁজে বন্ধ বা মুছে ফেলুন।
+</p>
+
+<p>দুই ধরনের plugin কখনোই অব্যবহৃত হিসেবে দেখানো হয় না:</p>
+<ul>
+  <li>প্রতিষ্ঠান-নিয়ন্ত্রিত plugin এবং <code>--plugin-dir</code> দিয়ে লোড করা plugin</li>
+  <li>যেসব plugin theme, output style, monitor বা workflow দেয় — কারণ এগুলো আলাদা করে ডাকতে হয় না</li>
+</ul>
+
+<h2>৬.৪ Marketplace ব্যবস্থাপনা</h2>
+
+<pre><code><span class="cm"># যোগ করা সব marketplace-এর তালিকা</span>
+/plugin marketplace list
+
+<span class="cm"># ক্যাটালগ হালনাগাদ করা</span>
+/plugin marketplace update marketplace-name
+
+<span class="cm"># marketplace বাদ দেওয়া</span>
+/plugin marketplace remove marketplace-name</code></pre>
+
+<div class="box warn">
+  <span class="lbl">সতর্কতা</span>
+  <p>
+    কোনো marketplace বাদ দিলে সেখান থেকে ইনস্টল করা <strong>সব plugin মুছে যাবে</strong>।
+  </p>
+</div>
+
+<h2>৬.৫ স্বয়ংক্রিয় হালনাগাদ</h2>
+
+<p>
+  Session শুরুর পরে Claude Code পটভূমিতে marketplace ও ইনস্টল করা plugin হালনাগাদ করতে পারে।
+  চলমান session যেন হঠাৎ বদলে না যায়, সেজন্য এই পরীক্ষা <strong>১০ মিনিট পর্যন্ত এলোমেলো
+  বিলম্বে</strong> চালানো হয়। কিছু হালনাগাদ হলে <code>/reload-plugins</code> চালানোর
+  পরামর্শ দেখানো হয়; নাহলে পরের বার চালু করার সময় নতুন সংস্করণ লোড হয়।
+</p>
+
+<p>UI থেকে প্রতিটি marketplace-এর জন্য আলাদাভাবে চালু বা বন্ধ করা যায়:</p>
+
+<ol class="steps">
+  <li><code>/plugin</code> চালিয়ে plugin manager খুলুন</li>
+  <li><strong>Marketplaces</strong> নির্বাচন করুন</li>
+  <li>তালিকা থেকে একটি marketplace বাছুন</li>
+  <li><strong>Enable auto-update</strong> বা <strong>Disable auto-update</strong> বেছে নিন</li>
+</ol>
+
+<p>
+  <code>claude-plugins-official</code> এবং Anthropic-এর অন্যান্য official marketplace-এ
+  auto-update ডিফল্টভাবে চালু থাকে। তৃতীয় পক্ষের ও স্থানীয় development marketplace-এ
+  ডিফল্টভাবে বন্ধ থাকে।
+</p>
+
+<p>পরিবেশ-চলক দিয়ে নিয়ন্ত্রণ:</p>
+
+<pre><code><span class="cm"># Claude Code ও plugin — দুটোরই auto-update বন্ধ</span>
+export DISABLE_AUTOUPDATER=1
+
+<span class="cm"># Claude Code-এর auto-update বন্ধ, কিন্তু plugin-এর চালু</span>
+export DISABLE_AUTOUPDATER=1
+export FORCE_AUTOUPDATE_PLUGINS=1</code></pre>
+
+<h2>৬.৬ ইনস্টলের সময় ক্যাটালগ হালনাগাদের নিয়ম</h2>
+
+<p>
+  Plugin-এর নাম কীভাবে লিখছেন তার উপর নির্ভর করে Claude Code ক্যাটালগ আগে হালনাগাদ করবে কি না:
+</p>
+
+<table class="long">
+  <colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+  <thead><tr><th>যেভাবে লিখলেন</th><th>যা ঘটে</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>plugin-name@marketplace-name</code></td>
+      <td>খোঁজার আগে ওই marketplace হালনাগাদ করা হয় — auto-update বন্ধ থাকলেও। হালনাগাদ ব্যর্থ হলে (যেমন ইন্টারনেট না থাকলে) cache করা ক্যাটালগ থেকেই খোঁজা হয়।</td>
+    </tr>
+    <tr>
+      <td>শুধু <code>plugin-name</code></td>
+      <td>প্রথমে cache-এ খোঁজা হয়; না পেলে কেবল সেই marketplace-গুলো হালনাগাদ হয় যেগুলোর auto-update চালু। নতুন প্রকাশিত plugin ইনস্টল করতে আগে <code>/plugin marketplace update &lt;name&gt;</code> চালিয়ে নিন।</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>৬.৭ Reload-এর খরচ</h2>
+
+<p>
+  <code>/reload-plugins</code> চালালে Claude Code সব সক্রিয় plugin আবার লোড করে এবং
+  plugin, skill, agent, hook, MCP server ও LSP server-এর সংখ্যা দেখায়। নতুন লোড হওয়া
+  উপাদানগুলো conversation-এ নিজেদের পরিচয় যোগ করে, ফলে পরের request-এ কিছু বাড়তি
+  token খরচ হয়। বিশেষ করে যেসব plugin MCP server দেয়, সেগুলোর ক্ষেত্রে খরচ বেশি —
+  পুরো conversation আবার পড়া লাগতে পারে।
+</p>
+
+<!-- ==================== অধ্যায় ৭ ==================== -->
+<h1><span class="chno">অধ্যায় ৭</span>নিজের Plugin তৈরি</h1>
+
+<p class="lead">
+  এবার উল্টো দিক — ব্যবহারকারী থেকে নির্মাতা। এই অধ্যায়ে শূন্য থেকে একটি plugin তৈরি করে
+  পরীক্ষা করা, তারপর তাতে agent, hook ও MCP server যোগ করা শেখানো হয়েছে।
+</p>
+
+<h2>৭.১ প্রথম Plugin — হাতেকলমে</h2>
+
+<p>শুরুর আগে Claude Code ইনস্টল ও authenticate করা থাকতে হবে।</p>
+
+<ol class="steps">
+  <li>
+    <p><strong>Plugin-এর ফোল্ডার তৈরি করুন।</strong> জায়গাটা এখন গুরুত্বপূর্ণ নয়, কারণ পরীক্ষার সময়
+    আমরা <code>--plugin-dir</code> দিয়ে সরাসরি এই ফোল্ডারটিই দেখিয়ে দেব:</p>
+    <pre><code>mkdir my-first-plugin</code></pre>
+  </li>
+
+  <li>
+    <p><strong>Manifest লিখুন।</strong> প্রথমে <code>.claude-plugin</code> ফোল্ডার:</p>
+    <pre><code>mkdir my-first-plugin/.claude-plugin</code></pre>
+    <p>তারপর তার ভেতরে <code>plugin.json</code>:</p>
+    <p class="filename">my-first-plugin/.claude-plugin/plugin.json</p>
+    <pre><code>{
+  "name": "my-first-plugin",
+  "description": "A greeting plugin to learn the basics",
+  "version": "1.0.0",
+  "author": {
+    "name": "Your Name"
+  }
+}</code></pre>
+    <table>
+      <colgroup><col style="width:22%"><col style="width:78%"></colgroup>
+      <thead><tr><th>ক্ষেত্র</th><th>কাজ</th></tr></thead>
+      <tbody>
+        <tr><td><code>name</code></td><td>অনন্য পরিচয় এবং skill-এর namespace — skill হবে <code>/my-first-plugin:hello</code></td></tr>
+        <tr><td><code>description</code></td><td>Plugin manager-এ যা দেখা যাবে</td></tr>
+        <tr><td><code>version</code></td><td>ঐচ্ছিক। দিলে এটি না বাড়ানো পর্যন্ত ব্যবহারকারীরা হালনাগাদ পাবেন না</td></tr>
+        <tr><td><code>author</code></td><td>ঐচ্ছিক, কৃতিত্বের জন্য</td></tr>
+      </tbody>
+    </table>
+  </li>
+
+  <li>
+    <p><strong>একটি skill যোগ করুন।</strong> Skill থাকে <code>skills/</code> ফোল্ডারে; ফোল্ডারের নামই
+    skill-এর নাম হয়:</p>
+    <pre><code>mkdir -p my-first-plugin/skills/hello</code></pre>
+    <p class="filename">my-first-plugin/skills/hello/SKILL.md</p>
+    <pre><code>---
+description: Greet the user with a friendly message
+disable-model-invocation: true
+---
+
+Greet the user warmly and ask how you can help them today.</code></pre>
+  </li>
+
+  <li>
+    <p><strong>পরীক্ষা করুন।</strong> <code>--plugin-dir</code> দিয়ে Claude Code চালু করলে plugin-টি
+    ইনস্টল ছাড়াই লোড হয়:</p>
+    <pre><code>claude --plugin-dir ./my-first-plugin</code></pre>
+    <p>চালু হওয়ার পরে skill-টি ডাকুন:</p>
+    <pre><code>/my-first-plugin:hello</code></pre>
+    <p class="small">
+      <code>/help</code> চালিয়ে <strong>Custom commands</strong> ট্যাবে গেলে আপনার skill-টি
+      plugin namespace-এর নিচে তালিকাভুক্ত দেখতে পাবেন।
+    </p>
+  </li>
+
+  <li>
+    <p><strong>Argument যোগ করুন।</strong> <code>$ARGUMENTS</code> লিখলে skill-এর নামের পরে
+    ব্যবহারকারীর লেখা যেকোনো টেক্সট সেখানে বসে যায়:</p>
+    <p class="filename">my-first-plugin/skills/hello/SKILL.md</p>
+    <pre><code>---
+description: Greet the user with a personalized message
+---
+
+# Hello Skill
+
+Greet the user named "$ARGUMENTS" warmly and ask how you can help
+them today. Make the greeting personal and encouraging.</code></pre>
+    <p>পরিবর্তন কার্যকর করতে <code>/reload-plugins</code> চালিয়ে তারপর:</p>
+    <pre><code>/my-first-plugin:hello Alex</code></pre>
+  </li>
+</ol>
+
+<div class="box">
+  <span class="lbl">নোট — Namespace কেন?</span>
+  <p>
+    Plugin-এর skill সবসময় namespace সহ থাকে (<code>/my-first-plugin:hello</code>), যাতে
+    দুটি ভিন্ন plugin-এ একই নামের skill থাকলেও সংঘর্ষ না হয়। Namespace বদলাতে চাইলে
+    <code>plugin.json</code>-এর <code>name</code> ক্ষেত্রটি বদলান।
+  </p>
+</div>
+
+<h2>৭.২ Skills ডিরেক্টরিতে plugin রাখা</h2>
+
+<p>
+  প্রতিবার <code>--plugin-dir</code> লিখতে না চাইলে plugin-টি সরাসরি আপনার skills
+  ডিরেক্টরিতে রাখতে পারেন — তখন Claude Code নিজেই সেটি লোড করে নেয়।
+  <code>claude plugin init</code> কাঠামোটি তৈরি করে দেয়:
+</p>
+
+<pre><code>claude plugin init my-tool
+
+<span class="cm"># নির্দিষ্ট উপাদান সহ</span>
+claude plugin init my-tool --with skills agents hooks mcp</code></pre>
+
+<p>
+  এতে <code>~/.claude/skills/my-tool/</code> তৈরি হয়, ভেতরে
+  <code>.claude-plugin/plugin.json</code> ও একটি প্রাথমিক <code>SKILL.md</code> থাকে।
+  পরের session-এ এটি <code>my-tool@skills-dir</code> হিসেবে লোড হয় — কোনো marketplace
+  বা ইনস্টলের ধাপ লাগে না।
+</p>
+
+<h2>৭.৩ পূর্ণাঙ্গ ডিরেক্টরি কাঠামো</h2>
+
+<pre><code>plugin-name/
+├── .claude-plugin/
+│   └── plugin.json          <span class="cm"># manifest (ঐচ্ছিক)</span>
+├── skills/                  <span class="cm"># SKILL.md সহ ফোল্ডার</span>
+│   └── skill-name/
+│       └── SKILL.md
+├── commands/                <span class="cm"># সরল .md ফাইল</span>
+├── agents/                  <span class="cm"># subagent-এর সংজ্ঞা</span>
+├── workflows/
+├── output-styles/
+├── themes/                  <span class="cm"># experimental</span>
+├── monitors/                <span class="cm"># experimental</span>
+├── hooks/
+│   └── hooks.json
+├── .mcp.json
+├── .lsp.json
+├── bin/                     <span class="cm"># PATH-এ যুক্ত হয়</span>
+├── scripts/
+├── package.json
+└── LICENSE</code></pre>
+
+<p>
+  Plugin-এ একটিমাত্র skill থাকলে <code>skills/</code> ফোল্ডার না বানিয়ে সরাসরি plugin
+  root-এ <code>SKILL.md</code> রাখা যায়; তখন frontmatter-এর <code>name</code> ক্ষেত্রটি
+  skill-এর নাম হিসেবে ব্যবহৃত হয়। ভবিষ্যতে একাধিক skill যোগ করার সম্ভাবনা থাকলে
+  <code>skills/</code> কাঠামোই ব্যবহার করুন।
+</p>
+
+<h2>৭.৪ plugin.json — পূর্ণ schema</h2>
+
+<pre><code>{
+  "name": "plugin-name",
+  "displayName": "Human Readable Name",
+  "version": "1.0.0",
+  "description": "What this plugin does",
+  "author": { "name": "Author Name", "email": "author@example.com" },
+  "homepage": "https://docs.example.com/plugin",
+  "repository": "https://github.com/author/plugin",
+  "license": "MIT",
+  "keywords": ["keyword1", "keyword2"],
+  "defaultEnabled": true,
+
+  "skills": "./custom/skills/",
+  "commands": ["./commands/", "./extra.md"],
+  "agents": "./custom/agents/",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./mcp-config.json",
+  "lspServers": "./.lsp.json",
+
+  "userConfig": {
+    "api_token": {
+      "type": "string",
+      "title": "API Token",
+      "description": "Authentication token",
+      "sensitive": true,
+      "required": true
+    }
+  },
+
+  "dependencies": [
+    "helper-plugin",
+    { "name": "secrets-vault", "version": "~2.1.0" }
+  ]
+}</code></pre>
+
+<p>বাধ্যতামূলক ক্ষেত্র কেবল একটি — <code>name</code>, যা kebab-case-এ লিখতে হয়।</p>
+
+<div class="box warn">
+  <span class="lbl">সতর্কতা — path-এর নিয়ম</span>
+  <p>
+    সব path আপেক্ষিক হতে হবে এবং <code>./</code> দিয়ে শুরু করতে হবে। আরেকটি সূক্ষ্ম পার্থক্য
+    মনে রাখুন: <code>skills</code> ক্ষেত্রটি ডিফল্ট <code>skills/</code> স্ক্যানের সঙ্গে
+    <strong>যোগ হয়</strong>, কিন্তু <code>commands</code>, <code>agents</code>,
+    <code>workflows</code> ও <code>outputStyles</code> ডিফল্ট অবস্থানকে
+    <strong>প্রতিস্থাপন করে</strong>।
+  </p>
+</div>
+
+<h3>userConfig — ব্যবহারকারীর কাছ থেকে তথ্য নেওয়া</h3>
+
+<p>
+  <code>userConfig</code>-এ ঘোষিত মান LSP ও MCP কনফিগারেশনে এবং skill-এর ভেতরে
+  <code>${user_config.database_url}</code> আকারে ব্যবহার করা যায়। গোপনীয় তথ্যের জন্য
+  <code>"sensitive": true</code> দিন।
+</p>
+
+<h2>৭.৫ পরীক্ষা ও ত্রুটি নির্ণয়</h2>
+
+<pre><code><span class="cm"># স্থানীয় ফোল্ডার থেকে লোড</span>
+claude --plugin-dir ./my-plugin
+
+<span class="cm"># .zip আর্কাইভ থেকেও চলে</span>
+claude --plugin-dir ./my-plugin.zip
+
+<span class="cm"># একাধিক plugin একসঙ্গে</span>
+claude --plugin-dir ./plugin-one --plugin-dir ./plugin-two
+
+<span class="cm"># URL-এ রাখা .zip থেকে (শুধু ওই session-এর জন্য)</span>
+claude --plugin-url https://example.com/my-plugin.zip</code></pre>
+
+<p>
+  <code>--plugin-dir</code> দিয়ে লোড করা plugin-এর নাম যদি ইনস্টল করা কোনো marketplace
+  plugin-এর নামের সঙ্গে মিলে যায়, তবে ওই session-এ স্থানীয় কপিটিই অগ্রাধিকার পায়।
+  ফলে ইনস্টল করা plugin আনইনস্টল না করেই তার পরিবর্তন পরীক্ষা করা যায়।
+</p>
+
+<p>জমা দেওয়ার আগে বা বিতরণের আগে যাচাই করে নিন:</p>
+
+<pre><code>claude plugin validate ./my-plugin
+claude plugin validate ./my-plugin --strict</code></pre>
+
+<p>
+  সফল হলে <code>✔ Validation passed</code> লেখা আসে; warning থাকলে
+  <code>✔ Validation passed with warnings</code>। Warning সাধারণত যাচাই ব্যর্থ করে না,
+  তবে <code>--strict</code> দিলে warning-ও ত্রুটি হিসেবে গণ্য হয়।
+</p>
+
+<p>সমস্যা হলে যা দেখবেন:</p>
+<ul>
+  <li><strong>কাঠামো ঠিক আছে কি না</strong> — ফোল্ডারগুলো plugin root-এ আছে তো, <code>.claude-plugin/</code>-এর ভেতরে নয়?</li>
+  <li><strong>প্রতিটি উপাদান আলাদা করে</strong> — skill, agent ও hook একে একে পরীক্ষা করুন</li>
+  <li><strong>Skill</strong> — <code>/plugin-name:skill-name</code> দিয়ে ডেকে দেখুন</li>
+  <li><strong>Agent</strong> — <code>/context</code>-এর <strong>Custom Agents</strong> অংশে আছে কি না দেখুন, বা নাম ধরে @-mention করুন</li>
+  <li><strong>Hook</strong> — যে ঘটনার সঙ্গে বাঁধা সেটি ঘটান (যেমন <code>PostToolUse</code>-এর জন্য Claude-কে একটি ফাইল সম্পাদনা করতে বলুন) এবং debug log-এ ফলাফল দেখুন</li>
+  <li><strong>ত্রুটি</strong> — <code>/plugin</code>-এর <strong>Errors</strong> ট্যাব, আর বিস্তারিত জানতে <code>claude --debug</code></li>
+</ul>
+
+<h2>৭.৬ পুরোনো কনফিগারেশনকে plugin-এ রূপান্তর</h2>
+
+<p>
+  <code>.claude/</code> ফোল্ডারে আগে থেকেই skill বা hook থাকলে সেগুলো plugin-এ নিয়ে আসা সহজ:
+</p>
+
+<ol class="steps">
+  <li>
+    <p>Plugin-এর কাঠামো ও manifest তৈরি করুন:</p>
+    <pre><code>mkdir -p my-plugin/.claude-plugin</code></pre>
+  </li>
+  <li>
+    <p>বিদ্যমান ফোল্ডারগুলো কপি করুন (যেটি নেই, সেই command বাদ দিন):</p>
+    <pre><code>cp -r .claude/commands my-plugin/
+cp -r .claude/agents my-plugin/
+cp -r .claude/skills my-plugin/</code></pre>
+  </li>
+  <li>
+    <p>Hook থাকলে <code>settings.json</code>-এর <code>hooks</code> অংশটি হুবহু
+    <code>my-plugin/hooks/hooks.json</code>-এ নিয়ে যান — গঠন একই।</p>
+  </li>
+  <li>
+    <p>পরীক্ষা করুন:</p>
+    <pre><code>claude --plugin-dir ./my-plugin</code></pre>
+  </li>
+</ol>
+
+<table>
+  <colgroup><col style="width:50%"><col style="width:50%"></colgroup>
+  <thead><tr><th>Standalone (<code>.claude/</code>)</th><th>Plugin</th></tr></thead>
+  <tbody>
+    <tr><td>শুধু একটি প্রকল্পে পাওয়া যায়</td><td>Marketplace দিয়ে ভাগ করা যায়</td></tr>
+    <tr><td>ফাইল থাকে <code>.claude/commands/</code>-এ</td><td>ফাইল থাকে <code>plugin-name/commands/</code>-এ</td></tr>
+    <tr><td>Hook থাকে <code>settings.json</code>-এ</td><td>Hook থাকে <code>hooks/hooks.json</code>-এ</td></tr>
+    <tr><td>ভাগ করতে হাতে কপি করতে হয়</td><td><code>/plugin install</code> দিয়েই হয়ে যায়</td></tr>
+  </tbody>
+</table>
+
+<div class="box">
+  <span class="lbl">নোট</span>
+  <p>
+    রূপান্তরের পরে <code>.claude/</code>-এর মূল ফাইলগুলো মুছে ফেলুন, নাহলে একই জিনিস দুবার থাকবে।
+    বিশেষ করে project ও user স্তরের <code>.claude/agents/</code>-এর সংজ্ঞা একই নামের plugin
+    agent-কে ছাপিয়ে যায় — মূল ফাইল না সরালে plugin-এর সংস্করণটি কার্যকর হবে না।
+  </p>
+</div>
+
+<!-- ==================== অধ্যায় ৮ ==================== -->
+<h1><span class="chno">অধ্যায় ৮</span>দলগত Marketplace ও নিরাপত্তা</h1>
+
+<div class="box warn">
+  <span class="lbl">সতর্কতা — সবার আগে পড়ুন</span>
+  <p>
+    Plugin ও marketplace অত্যন্ত <strong>বিশ্বাসনির্ভর</strong> উপাদান — এগুলো আপনার
+    মেশিনে আপনারই অধিকার নিয়ে যেকোনো কোড চালাতে পারে। Anthropic নিয়ন্ত্রণ করে না
+    কোনো plugin-এর ভেতরে কী MCP server, ফাইল বা সফটওয়্যার আছে, এবং সেগুলো ঠিকঠাক
+    কাজ করে কি না তারও নিশ্চয়তা দেয় না। <strong>কেবল বিশ্বস্ত উৎস থেকে</strong> plugin
+    ইনস্টল করুন এবং marketplace যোগ করুন। ইনস্টলের আগে plugin-এর homepage দেখে নিন।
+  </p>
+</div>
+
+<h2>৮.১ দলের জন্য marketplace কনফিগার করা</h2>
+
+<p>
+  প্রকল্পের <code>.claude/settings.json</code>-এ marketplace ঘোষণা করে রাখলে দলের সদস্যরা
+  আলাদা করে যোগ করার ঝামেলা থেকে বাঁচেন। সদস্য একবার repository-র folder-টিকে
+  <strong>trust</strong> করলে Claude Code আর কিছু জিজ্ঞেস না করেই marketplace-গুলো যোগ করে নেয়।
+</p>
+
+<p class="filename">.claude/settings.json</p>
+<pre><code>{
+  "extraKnownMarketplaces": {
+    "my-team-tools": {
+      "source": {
+        "source": "github",
+        "repo": "your-org/claude-plugins"
+      }
+    }
+  }
+}</code></pre>
+
+<div class="box">
+  <span class="lbl">নোট</span>
+  <p>
+    Marketplace যোগ হওয়া মানেই plugin ইনস্টল হয়ে যাওয়া নয়। GitHub repository বা npm
+    package-এর মতো বাইরের উৎস থেকে আসা যে plugin শুধু প্রকল্পের
+    <code>.claude/settings.json</code>-এ চালু করা আছে, সেটি সদস্য নিজে ইনস্টল না করা পর্যন্ত
+    লোড হবে না। ততক্ষণ Claude Code plugin-টিকে "ইনস্টল করা নেই" হিসেবে দেখায় এবং
+    চালানোর জন্য <code>claude plugin install</code> command-টি দেখিয়ে দেয়।
+  </p>
+</div>
+
+<h2>৮.২ প্রতিষ্ঠানের নিয়ন্ত্রণ</h2>
+
+<p>
+  প্রশাসকেরা managed settings দিয়ে নিয়ন্ত্রণ করতে পারেন ব্যবহারকারীরা কোন কোন marketplace
+  যোগ করতে পারবেন:
+</p>
+
+<table class="long">
+  <colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+  <thead><tr><th>Setting</th><th>কাজ</th></tr></thead>
+  <tbody>
+    <tr><td><code>strictKnownMarketplaces</code></td><td>অনুমোদিত marketplace-এর তালিকা বেঁধে দেয় — এর বাইরে থেকে কিছু যোগ বা ইনস্টল করা যায় না</td></tr>
+    <tr><td><code>pluginSuggestionMarketplaces</code></td><td>কোন marketplace থেকে <code>/plugin</code>-এ ইনস্টলের পরামর্শ দেখানো হবে তা ঠিক করে</td></tr>
+    <tr><td><code>extraKnownMarketplaces</code></td><td>প্রতিষ্ঠান বা repository-র জন্য marketplace নিবন্ধন করে; প্রতিটি entry-তে <code>"autoUpdate": true</code> দিলে auto-update চালু হয়</td></tr>
+    <tr><td><code>enabledPlugins</code></td><td>কোন plugin চালু বা বন্ধ থাকবে তা scope অনুযায়ী নির্ধারণ করে</td></tr>
+  </tbody>
+</table>
+
+<p>
+  <code>strictKnownMarketplaces</code> চালু থাকলে <strong>Not used recently</strong> শিরোনাম ও
+  <strong>Last used</strong> লাইনটি লুকিয়ে রাখা হয়।
+</p>
+
+<p>
+  Managed scope-এ ইনস্টল করা plugin ব্যবহারকারী বদলাতে পারেন না — <code>/plugin</code>-এ
+  সেগুলো <strong>managed</strong> হিসেবে দেখানো হয়।
+</p>
+
+<h2>৮.৩ নিজের marketplace তৈরি ও বিতরণ</h2>
+
+<p>
+  Marketplace আসলে একটি git repository, যার মধ্যে <code>.claude-plugin/marketplace.json</code>
+  ফাইলে plugin-গুলোর তালিকা থাকে। প্রতিষ্ঠানের ভেতরের plugin গোপন রাখতে চাইলে
+  marketplace-টি একটি <strong>private repository</strong>-তে রাখুন।
+</p>
+
+<p>Plugin প্রস্তুত হলে বিতরণের আগে করণীয়:</p>
+<ol class="steps">
+  <li><strong>ডকুমেন্টেশন লিখুন</strong> — একটি <code>README.md</code>, যাতে ইনস্টল ও ব্যবহারের নির্দেশনা থাকে</li>
+  <li><strong>Version কৌশল ঠিক করুন</strong> — <code>version</code> ক্ষেত্রটি নিজে দেবেন, নাকি ডিফল্ট ব্যবস্থার উপর ছেড়ে দেবেন</li>
+  <li><strong>Marketplace-এ যুক্ত করুন</strong> — নিজের marketplace তৈরি করুন বা বিদ্যমান কোনোটিতে জমা দিন</li>
+  <li><strong>অন্যদের দিয়ে পরীক্ষা করান</strong> — বড় পরিসরে ছাড়ার আগে দলের সদস্যদের দিয়ে যাচাই করিয়ে নিন</li>
+</ol>
+
+<h2>৮.৪ Community marketplace-এ plugin জমা দেওয়া</h2>
+
+<p>জমা দেওয়ার জন্য অ্যাপের ভেতরের যেকোনো একটি form ব্যবহার করুন:</p>
+
+<ul>
+  <li><strong>claude.ai</strong> — <span class="en">claude.ai/admin-settings/directory/submissions/plugins/new</span><br>
+      <span class="small">এর জন্য Team বা Enterprise প্রতিষ্ঠান এবং directory management-এর অনুমতি লাগে; প্রতিষ্ঠানের Owner-রা এই অনুমতি ডিফল্টভাবেই পান।</span></li>
+  <li><strong>Console</strong> — <span class="en">platform.claude.com/plugins/submit</span><br>
+      <span class="small">যাঁরা কোনো Team বা Enterprise প্রতিষ্ঠানের অংশ নন, তাঁরা এটি ব্যবহার করতে পারেন।</span></li>
+</ul>
+
+<p>
+  জমা দেওয়ার আগে অবশ্যই স্থানীয়ভাবে <code>claude plugin validate ./your-plugin</code>
+  চালিয়ে নিন — পর্যালোচনার সময় ঠিক এই পরীক্ষাটিই চালানো হয়, সঙ্গে স্বয়ংক্রিয়
+  নিরাপত্তা যাচাই।
+</p>
+
+<p>
+  অনুমোদিত plugin community ক্যাটালগে একটি নির্দিষ্ট <strong>commit SHA</strong>-তে pin করা হয়,
+  এবং আপনি নতুন commit push করলে CI নিজেই সেই pin হালনাগাদ করে দেয়। প্রকাশ্য ক্যাটালগটি
+  প্রতি রাতে sync হয়, তাই অনুমোদনের পরে plugin দেখা যেতে কিছুটা সময় লাগতে পারে।
+</p>
+
+<!-- ==================== অধ্যায় ৯ ==================== -->
+<h1><span class="chno">অধ্যায় ৯</span>সমস্যা সমাধান</h1>
+
+<p class="lead">
+  Plugin নিয়ে কাজ করতে গিয়ে যে সমস্যাগুলো সবচেয়ে বেশি হয়, সেগুলোর কারণ ও সমাধান।
+</p>
+
+<h2>৯.১ <code>/plugin</code> command চেনা যাচ্ছে না</h2>
+
+<p>"unknown command" দেখালে বা <code>/plugin</code> তালিকায় না এলে:</p>
+
+<ol class="steps">
+  <li>
+    <p>সংস্করণ দেখুন:</p>
+    <pre><code>claude --version</code></pre>
+  </li>
+  <li>
+    <p>Claude Code হালনাগাদ করুন:</p>
+    <pre><code><span class="cm"># Homebrew</span>
+brew upgrade claude-code
+
+<span class="cm"># npm</span>
+npm install -g @anthropic-ai/claude-code@latest</code></pre>
+    <p class="small">Native installer দিয়ে ইনস্টল করে থাকলে Setup-এর install command-টি আবার চালান।</p>
+  </li>
+  <li><p>টার্মিনাল বন্ধ করে আবার খুলে <code>claude</code> চালান।</p></li>
+</ol>
+
+<p class="small">
+  <code>/plugin</code> একটি interactive panel খোলে, যা টার্মিনাল CLI-র জন্য। Claude যদি বলে
+  এই পরিবেশে <code>/plugin</code> নেই, তাহলে Desktop app-এর plugin browser ব্যবহার করুন,
+  অথবা cloud session-এর জন্য <code>.claude/settings.json</code>-এ
+  <code>enabledPlugins</code> ঘোষণা করুন (অধ্যায় ৫.৩)।
+</p>
+
+<h2>৯.২ ইনস্টল ব্যর্থ হচ্ছে</h2>
+
+<table class="long">
+  <colgroup><col style="width:42%"><col style="width:58%"></colgroup>
+  <thead><tr><th>বার্তা</th><th>করণীয়</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>Marketplace "claude-plugins-official" not found</code></td>
+      <td>Marketplace-টি যোগ করে আবার চেষ্টা করুন:<br><code>/plugin marketplace add anthropics/claude-plugins-official</code></td>
+    </tr>
+    <tr>
+      <td>Plugin marketplace-এ পাওয়া যাচ্ছে না</td>
+      <td>নামের বানান মিলিয়ে দেখুন। নতুন প্রকাশিত plugin হলে আগে <code>/plugin marketplace update &lt;name&gt;</code> চালান।</td>
+    </tr>
+    <tr>
+      <td><code>marketplace not refreshed</code></td>
+      <td>ইনস্টলের আগে ক্যাটালগ হালনাগাদ করা যায়নি (যেমন ইন্টারনেট নেই) — cache করা ক্যাটালগ থেকেই ইনস্টল হয়েছে।</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>৯.৩ Skill দেখা যাচ্ছে না</h2>
+
+<p>Plugin ইনস্টল হয়েছে কিন্তু তার skill আসছে না — cache পরিষ্কার করে দেখুন:</p>
+
+<pre><code>rm -rf ~/.claude/plugins/cache</code></pre>
+
+<p>তারপর Claude Code আবার চালু করে plugin-টি পুনরায় ইনস্টল করুন।</p>
+
+<p class="small">
+  আরেকটি সম্ভাবনা: ইনস্টলের সারসংক্ষেপে <code>Run /reload-plugins to activate.</code>
+  লেখা ছিল, কিন্তু সেটি চালানো হয়নি।
+</p>
+
+<h2>৯.৪ Code intelligence (LSP) সংক্রান্ত সমস্যা</h2>
+
+<table class="long">
+  <colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+  <thead><tr><th>সমস্যা</th><th>সমাধান</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Language server চালু হচ্ছে না<br><code>Executable not found in $PATH</code></td>
+      <td>Binary-টি ইনস্টল আছে কি না এবং <code>PATH</code>-এ আছে কি না দেখুন (তালিকা অধ্যায় ৪.১-এ)। বিস্তারিত <code>/plugin</code>-এর <strong>Errors</strong> ট্যাবে।</td>
+    </tr>
+    <tr>
+      <td>অতিরিক্ত memory খরচ</td>
+      <td><code>rust-analyzer</code> ও <code>pyright</code>-এর মতো server বড় প্রকল্পে অনেক memory নেয়। সমস্যা হলে <code>/plugin disable &lt;plugin-name&gt;</code> দিয়ে বন্ধ করে Claude-এর নিজস্ব search tool-এর উপর নির্ভর করুন।</td>
+    </tr>
+    <tr>
+      <td>Monorepo-তে ভুল diagnostics</td>
+      <td>Workspace ঠিকমতো কনফিগার না থাকলে ভেতরের package-এর import "unresolved" দেখাতে পারে। এতে Claude-এর সম্পাদনার ক্ষমতা কমে না।</td>
+    </tr>
+    <tr>
+      <td>কনফিগারেশন ভুল</td>
+      <td>ভুল কনফিগারেশনের entry নীরবে বাদ পড়ে যায়। কারণ জানতে <code>claude --debug</code> চালান।</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>৯.৫ Diagnostics নিজে পড়া</h2>
+
+<p>
+  Claude Code যখন <strong>Found 3 new diagnostic issues in 2 files</strong>-এর মতো
+  বার্তা দেখায়, তখন <strong>Ctrl+O</strong> চেপে আপনি নিজেই সেই diagnostics পড়তে পারেন।
+</p>
+
+<!-- ==================== পরিশিষ্ট ক ==================== -->
+<h1><span class="chno">পরিশিষ্ট ক</span>Command রেফারেন্স</h1>
+
+<p class="lead">
+  এই পাতাটি আলাদা করে প্রিন্ট করে হাতের কাছে রাখতে পারেন।
+</p>
+
+<h2>Session-এর ভেতরের command</h2>
+
+<table class="long">
+  <colgroup><col style="width:47%"><col style="width:53%"></colgroup>
+  <thead><tr><th>Command</th><th>কাজ</th></tr></thead>
+  <tbody>
+    <tr><td><code>/plugin</code></td><td>Plugin manager খোলা (Discover / Installed / Marketplaces / Errors)</td></tr>
+    <tr><td><code>/plugin install &lt;name&gt;@&lt;market&gt;</code></td><td>Plugin ইনস্টল করা</td></tr>
+    <tr><td><code>/plugin list</code></td><td>ইনস্টল করা plugin-এর তালিকা</td></tr>
+    <tr><td><code>/plugin list --enabled</code></td><td>শুধু চালু plugin</td></tr>
+    <tr><td><code>/plugin list --disabled</code></td><td>শুধু বন্ধ plugin</td></tr>
+    <tr><td><code>/plugin info &lt;name&gt;</code></td><td>Plugin-এর বিস্তারিত</td></tr>
+    <tr><td><code>/plugin enable &lt;name&gt;@&lt;market&gt;</code></td><td>বন্ধ plugin আবার চালু করা</td></tr>
+    <tr><td><code>/plugin disable &lt;name&gt;@&lt;market&gt;</code></td><td>না মুছে বন্ধ রাখা</td></tr>
+    <tr><td><code>/plugin uninstall &lt;name&gt;@&lt;market&gt;</code></td><td>সম্পূর্ণ মুছে ফেলা</td></tr>
+    <tr><td><code>/plugin marketplace add &lt;source&gt;</code></td><td>Marketplace যোগ করা</td></tr>
+    <tr><td><code>/plugin marketplace list</code></td><td>Marketplace-এর তালিকা</td></tr>
+    <tr><td><code>/plugin marketplace update &lt;name&gt;</code></td><td>ক্যাটালগ হালনাগাদ</td></tr>
+    <tr><td><code>/plugin marketplace remove &lt;name&gt;</code></td><td>Marketplace বাদ দেওয়া (এর plugin-ও মুছে যায়)</td></tr>
+    <tr><td><code>/reload-plugins</code></td><td>পরিবর্তন কার্যকর করা, restart ছাড়াই</td></tr>
+    <tr><td><code>/reload-plugins --force</code></td><td>Prompt cache বাতিল হলেও জোর করে reload</td></tr>
+    <tr><td><code>/plugin-name:skill-name</code></td><td>Plugin-এর skill ব্যবহার করা</td></tr>
+  </tbody>
+</table>
+
+<p class="small">সংক্ষেপ: <code>/plugin marketplace</code> → <code>/plugin market</code>, এবং <code>remove</code> → <code>rm</code></p>
+
+<h2>Shell command</h2>
+
+<table class="long">
+  <colgroup><col style="width:47%"><col style="width:53%"></colgroup>
+  <thead><tr><th>Command</th><th>কাজ</th></tr></thead>
+  <tbody>
+    <tr><td><code>claude plugin init &lt;name&gt;</code></td><td>নতুন plugin-এর কাঠামো তৈরি</td></tr>
+    <tr><td><code>claude plugin init &lt;name&gt; --with ...</code></td><td>নির্দিষ্ট উপাদান সহ কাঠামো তৈরি</td></tr>
+    <tr><td><code>claude plugin install &lt;plugin&gt;</code></td><td>Interactive ধাপ ছাড়াই ইনস্টল</td></tr>
+    <tr><td><code>claude plugin install ... --scope project</code></td><td>নির্দিষ্ট scope-এ ইনস্টল</td></tr>
+    <tr><td><code>claude plugin list</code></td><td>তালিকা (<code>--json</code>, <code>--available</code> সহ)</td></tr>
+    <tr><td><code>claude plugin details &lt;plugin&gt;</code></td><td>কোন কোন উপাদান যোগ করে তার তালিকা</td></tr>
+    <tr><td><code>claude plugin enable / disable</code></td><td>চালু বা বন্ধ করা</td></tr>
+    <tr><td><code>claude plugin update &lt;plugin&gt;</code></td><td>হালনাগাদ করা</td></tr>
+    <tr><td><code>claude plugin uninstall &lt;plugin&gt;</code></td><td>মুছে ফেলা (<code>--keep-data</code>, <code>--prune</code> সহ)</td></tr>
+    <tr><td><code>claude plugin validate ./my-plugin</code></td><td>Plugin যাচাই করা (<code>--strict</code> সহ)</td></tr>
+    <tr><td><code>claude plugin marketplace add &lt;source&gt;</code></td><td>Shell থেকে marketplace যোগ</td></tr>
+    <tr><td><code>claude --plugin-dir ./my-plugin</code></td><td>স্থানীয় plugin লোড করে চালানো</td></tr>
+    <tr><td><code>claude --plugin-url &lt;url.zip&gt;</code></td><td>URL-এর .zip থেকে লোড করা</td></tr>
+    <tr><td><code>claude --debug</code></td><td>বিস্তারিত ত্রুটির তথ্য দেখা</td></tr>
+    <tr><td><code>claude --version</code></td><td>সংস্করণ দেখা</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== পরিশিষ্ট খ ==================== -->
+<h1><span class="chno">পরিশিষ্ট খ</span>পরিভাষা</h1>
+
+<p class="lead">
+  এই বইয়ে ব্যবহৃত ইংরেজি পরিভাষাগুলোর বাংলা ব্যাখ্যা।
+</p>
+
+<table class="long">
+  <colgroup><col style="width:24%"><col style="width:76%"></colgroup>
+  <thead><tr><th>ইংরেজি</th><th>বাংলা ব্যাখ্যা</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Plugin</strong></td><td>স্বয়ংসম্পূর্ণ প্যাকেজ, যা Claude Code-এ নতুন সক্ষমতা যোগ করে</td></tr>
+    <tr><td><strong>Marketplace</strong></td><td>Plugin-এর ক্যাটালগ, যেখান থেকে খুঁজে ইনস্টল করা যায়</td></tr>
+    <tr><td><strong>Manifest</strong></td><td><code>plugin.json</code> ফাইল, যেখানে plugin-এর পরিচয় ও কনফিগারেশন থাকে</td></tr>
+    <tr><td><strong>Skill</strong></td><td>নির্দিষ্ট কাজের জন্য লেখা নির্দেশনা; Claude প্রসঙ্গ বুঝে নিজেই ব্যবহার করে</td></tr>
+    <tr><td><strong>Agent / Subagent</strong></td><td>নিজস্ব prompt, model ও tool-সীমাসহ বিশেষায়িত সহকারী</td></tr>
+    <tr><td><strong>Hook</strong></td><td>নির্দিষ্ট ঘটনার সঙ্গে বাঁধা script, যা স্বয়ংক্রিয়ভাবে চলে</td></tr>
+    <tr><td><strong>MCP server</strong></td><td>Model Context Protocol server — বাইরের service-এর tool যোগ করে</td></tr>
+    <tr><td><strong>LSP server</strong></td><td>Language Server Protocol server — কোড বোঝা ও type error ধরার জন্য</td></tr>
+    <tr><td><strong>Namespace</strong></td><td>নামের সংঘর্ষ এড়াতে ব্যবহৃত উপসর্গ, যেমন <code>/plugin-name:skill-name</code></td></tr>
+    <tr><td><strong>Scope</strong></td><td>Plugin কোথায় কার্যকর হবে তার পরিধি — user, project, local বা managed</td></tr>
+    <tr><td><strong>Context window</strong></td><td>Claude একসঙ্গে যতটুকু তথ্য মনে রাখতে পারে; প্রতিটি plugin এর কিছু অংশ দখল করে</td></tr>
+    <tr><td><strong>Context cost</strong></td><td>একটি plugin প্রতি turn-এ যত token যোগ করে</td></tr>
+    <tr><td><strong>Diagnostics</strong></td><td>Language server-এর জানানো error ও warning</td></tr>
+    <tr><td><strong>Output style</strong></td><td>Claude কীভাবে উত্তর সাজাবে তার ধরন</td></tr>
+    <tr><td><strong>Monitor</strong></td><td>পটভূমিতে চলা প্রক্রিয়া, যা log বা অবস্থা দেখে Claude-কে জানায়</td></tr>
+    <tr><td><strong>Synced plugin</strong></td><td>claude.ai অ্যাকাউন্টে চালু করা plugin, যা cloud session-এ লোড হয়</td></tr>
+    <tr><td><strong>Managed settings</strong></td><td>প্রতিষ্ঠানের প্রশাসকের নির্ধারিত setting, যা ব্যবহারকারী বদলাতে পারেন না</td></tr>
+  </tbody>
+</table>
+
+<div class="colophon">
+  <p>
+    <strong>তথ্যসূত্র —</strong> এই বইয়ের সব তথ্য Claude Code-এর সরকারি ডকুমেন্টেশন থেকে নেওয়া:
+    <span class="en">code.claude.com/docs/en/plugins</span>,
+    <span class="en">/discover-plugins</span>,
+    <span class="en">/plugins-reference</span>,
+    <span class="en">/plugin-marketplaces</span>,
+    <span class="en">/desktop</span> এবং
+    <span class="en">/settings-reference</span>।
+  </p>
+  <p>
+    Claude Code দ্রুত বদলায় — কোনো command বা আচরণ এখানকার বর্ণনার সঙ্গে না মিললে
+    <code>claude --version</code> দিয়ে সংস্করণ মিলিয়ে নিন এবং উপরের ডকুমেন্টেশন দেখুন।
+    সংস্করণ ১.০ &middot; সেপ্টেম্বর ২০২৬।
+  </p>
+</div>
+
+</div><!-- /.sheet -->
+</body>
+</html>
